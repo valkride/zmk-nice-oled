@@ -25,7 +25,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "screen.h"
 #include "wpm.h"
 
-#include "custom_stats_service.h" // Add this include for stats_buffer access
 #include <lvgl.h> // Ensure LVGL is included for label drawing
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
@@ -60,18 +59,6 @@ static struct zmk_widget_hid_indicators hid_indicators_widget;
  * Draw canvas
  **/
 
-static void draw_stats_label(lv_obj_t *canvas) {
-    extern char stats_buffer[64]; // Provided by your custom_stats_service.c
-    static lv_obj_t *stats_label = NULL;
-    if (!stats_label) {
-        stats_label = lv_label_create(canvas);
-        lv_obj_align(stats_label, LV_ALIGN_BOTTOM_LEFT, 0, 0); // Place at bottom left
-        lv_label_set_long_mode(stats_label, LV_LABEL_LONG_CLIP); // Clip if too long
-        lv_obj_set_width(stats_label, CANVAS_WIDTH); // Fit width
-    }
-    lv_label_set_text(stats_label, stats_buffer);
-}
-
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
@@ -82,8 +69,6 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     draw_wpm_status(canvas, state);
     draw_profile_status(canvas, state);
     draw_layer_status(canvas, state);
-
-    draw_stats_label(canvas); // Draw the live stats label
 
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
