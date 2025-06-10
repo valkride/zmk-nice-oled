@@ -19,12 +19,13 @@ struct status_state {
     int active_profile_index;
     bool active_profile_connected;
     bool active_profile_bonded;
-    uint8_t layer_index;
-    const char *layer_label;
     uint8_t wpm[10];
 #else
     bool connected;
 #endif
+    // Always present for both sides:
+    uint8_t layer_index;
+    const char *layer_label;
 };
 
 void to_uppercase(char *str);
