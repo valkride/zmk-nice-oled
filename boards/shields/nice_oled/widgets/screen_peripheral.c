@@ -75,9 +75,9 @@ static struct battery_status_state battery_status_get_state(const zmk_event_t *e
 ZMK_DISPLAY_WIDGET_LISTENER(widget_battery_status, struct battery_status_state,
                             battery_status_update_cb, battery_status_get_state);
 
-ZMK_SUBSCRIPTION(widget_battery_status, zmk_battery_state_changed);
+ZMK_SUBSCRIPTION(widget_battery_status, battery_state_changed);
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
-ZMK_SUBSCRIPTION(widget_battery_status, zmk_usb_conn_state_changed);
+ZMK_SUBSCRIPTION(widget_battery_status, usb_conn_state_changed);
 #endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
 
 /**
@@ -106,7 +106,7 @@ static struct layer_status_state layer_status_get_state(const zmk_event_t *eh) {
 ZMK_DISPLAY_WIDGET_LISTENER(widget_layer_status, struct layer_status_state, layer_status_update_cb,
                             layer_status_get_state)
 
-ZMK_SUBSCRIPTION(widget_layer_status, zmk_layer_state_changed);
+ZMK_SUBSCRIPTION(widget_layer_status, layer_state_changed);
 
 /**
  * Output status
@@ -138,13 +138,13 @@ static struct output_status_state output_status_get_state(const zmk_event_t *_eh
 
 ZMK_DISPLAY_WIDGET_LISTENER(widget_output_status, struct output_status_state,
                             output_status_update_cb, output_status_get_state)
-ZMK_SUBSCRIPTION(widget_output_status, zmk_endpoint_changed);
+ZMK_SUBSCRIPTION(widget_output_status, endpoint_changed);
 
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
-ZMK_SUBSCRIPTION(widget_output_status, zmk_usb_conn_state_changed);
+ZMK_SUBSCRIPTION(widget_output_status, usb_conn_state_changed);
 #endif
 #if defined(CONFIG_ZMK_BLE)
-ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
+ZMK_SUBSCRIPTION(widget_output_status, ble_active_profile_changed);
 #endif
 
 /**
@@ -171,7 +171,7 @@ struct wpm_status_state wpm_status_get_state(const zmk_event_t *eh) {
 
 ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status, struct wpm_status_state, wpm_status_update_cb,
                             wpm_status_get_state)
-ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
+ZMK_SUBSCRIPTION(widget_wpm_status, wpm_state_changed);
 
 /**
  * Initialization

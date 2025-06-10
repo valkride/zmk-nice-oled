@@ -105,9 +105,9 @@ static struct battery_status_state battery_status_get_state(const zmk_event_t *e
 ZMK_DISPLAY_WIDGET_LISTENER(widget_battery_status, struct battery_status_state,
                             battery_status_update_cb, battery_status_get_state);
 
-ZMK_SUBSCRIPTION(widget_battery_status, zmk_battery_state_changed);
+ZMK_SUBSCRIPTION(widget_battery_status, battery_state_changed);
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
-ZMK_SUBSCRIPTION(widget_battery_status, zmk_usb_conn_state_changed);
+ZMK_SUBSCRIPTION(widget_battery_status, usb_conn_state_changed);
 #endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
 
 /**
@@ -133,7 +133,7 @@ static void output_status_update_cb(struct peripheral_status_state state) {
 
 ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_state,
                             output_status_update_cb, get_state)
-ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
+ZMK_SUBSCRIPTION(widget_peripheral_status, split_peripheral_status_changed);
 
 /**
  * Initialization
