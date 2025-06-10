@@ -1,8 +1,3 @@
-config NICE_EPAPER_ON
-    bool "Enable nice view widget compatibility"
-    default n
-
-if !NICE_EPAPER_ON
 
 if SHIELD_NICE_OLED
 
@@ -68,7 +63,7 @@ config NICE_OLED_VIM
     default n
 
 config NICE_OLED_VIP_MARCOS
-bool "Enable static vim_marcos on peripheral"
+    bool "Enable static vim_marcos on peripheral"
     default n
 
 config NICE_OLED_WIDGET_MASTER_TEST
@@ -106,9 +101,8 @@ config NICE_OLED_WIDGET_LAYER_RGB
 endif # !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
 
 endif # SHIELD_NICE_OLED
-endif # NICE_EPAPER_ON
 
-if SHIELD_NICE_OLED || SHIELD_NICE_EPAPER
+if SHIELD_NICE_OLED
 if !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
 
 ### NICE OLED WIDGET WPM
@@ -181,8 +175,4 @@ config NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA_ANIMATION_MS
 endif # NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA
 endif # NICE_OLED_WIDGET_MODIFIERS_INDICATORS
 endif # !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
-endif # SHIELD_NICE_OLED || SHIELD_NICE_EPAPER
-
-if NICE_EPAPER_ON
-rsource "nice_epaper/Kconfig.defconfig"
-endif # NICE_EPAPER_ON
+endif # SHIELD_NICE_OLED

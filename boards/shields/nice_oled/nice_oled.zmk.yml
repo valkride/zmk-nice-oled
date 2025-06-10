@@ -9,4 +9,3 @@ features:
   - display
 siblings:
   - nice_oled
-  - nice_epaper
