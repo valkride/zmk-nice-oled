@@ -15,6 +15,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #include "animation.h"
 #include "battery.h"
+#include "layer.h"
 #include "output.h"
 #include "screen_peripheral.h"
 
