@@ -8,7 +8,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/wpm_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/ble_active_profile_changed.h>
-#include <zmk/events/output_status_changed.h>
 
 #include "wpm.h"
 #include "layer.h"
@@ -98,27 +97,6 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_profile_status, struct profile_status_state, 
 ZMK_SUBSCRIPTION(widget_profile_status, zmk_ble_active_profile_changed);
 
 /**
- * Output status
- **/
-static void set_output_status(struct zmk_widget_screen_peripheral *widget, struct output_status_state state) {
-    widget->state.output = state.output;
-    draw_canvas(widget->obj, widget->cbuf, &widget->state);
-}
-
-static void output_status_update_cb(struct output_status_state state) {
-    struct zmk_widget_screen_peripheral *widget;
-    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_output_status(widget, state); }
-}
-
-static struct output_status_state output_status_get_state(const zmk_event_t *eh) {
-    const struct zmk_output_status_changed *ev = as_zmk_output_status_changed(eh);
-    return (struct output_status_state){.output = (ev != NULL) ? ev->output : 0};
-};
-
-ZMK_DISPLAY_WIDGET_LISTENER(widget_output_status, struct output_status_state, output_status_update_cb, output_status_get_state)
-ZMK_SUBSCRIPTION(widget_output_status, zmk_output_status_changed);
-
-/**
  * Initialization
  **/
 int zmk_widget_screen_peripheral_init(struct zmk_widget_screen_peripheral *widget, lv_obj_t *parent) {
@@ -134,7 +112,6 @@ int zmk_widget_screen_peripheral_init(struct zmk_widget_screen_peripheral *widge
     widget_wpm_status_init();
     widget_layer_status_init();
     widget_profile_status_init();
-    widget_output_status_init();
 
     return 0;
 }
