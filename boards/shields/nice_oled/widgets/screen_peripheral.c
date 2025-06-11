@@ -72,7 +72,7 @@ static void layer_status_update_cb(struct layer_status_state state) {
 
 static struct layer_status_state layer_status_get_state(const zmk_event_t *eh) {
     const struct zmk_layer_state_changed *ev = as_zmk_layer_state_changed(eh);
-    return (struct layer_status_state){.layer = (ev != NULL) ? ev->layer : 0};
+    return (struct layer_status_state){.index = (ev != NULL) ? ev->layer : 0, .label = NULL};
 };
 
 ZMK_DISPLAY_WIDGET_LISTENER(widget_layer_status, struct layer_status_state, layer_status_update_cb, layer_status_get_state)
