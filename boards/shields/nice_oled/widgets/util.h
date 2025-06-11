@@ -28,6 +28,7 @@ struct status_state {
 #else
   bool connected;
 #endif
+  bool connected;
 };
 
 void to_uppercase(char *str);

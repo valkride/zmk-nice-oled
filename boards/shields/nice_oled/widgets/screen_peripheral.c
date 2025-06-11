@@ -7,7 +7,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/event_manager.h>
 #include <zmk/events/wpm_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
-#include <zmk/events/profile_state_changed.h>
+#include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/output_status_changed.h>
 
 #include "wpm.h"
@@ -90,12 +90,12 @@ static void profile_status_update_cb(struct profile_status_state state) {
 }
 
 static struct profile_status_state profile_status_get_state(const zmk_event_t *eh) {
-    const struct zmk_profile_state_changed *ev = as_zmk_profile_state_changed(eh);
-    return (struct profile_status_state){.profile = (ev != NULL) ? ev->profile : 0};
+    const struct zmk_ble_active_profile_changed *ev = as_zmk_ble_active_profile_changed(eh);
+    return (struct profile_status_state){.profile = (ev != NULL) ? ev->profile->profile_index : 0};
 };
 
 ZMK_DISPLAY_WIDGET_LISTENER(widget_profile_status, struct profile_status_state, profile_status_update_cb, profile_status_get_state)
-ZMK_SUBSCRIPTION(widget_profile_status, zmk_profile_state_changed);
+ZMK_SUBSCRIPTION(widget_profile_status, zmk_ble_active_profile_changed);
 
 /**
  * Output status
