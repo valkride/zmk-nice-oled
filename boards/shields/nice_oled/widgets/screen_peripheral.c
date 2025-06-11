@@ -82,7 +82,9 @@ ZMK_SUBSCRIPTION(widget_layer_status, zmk_layer_state_changed);
  * Profile status
  **/
 static void set_profile_status(struct zmk_widget_screen_peripheral *widget, struct profile_status_state state) {
-    widget->state.profile = state.profile;
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+    widget->state.active_profile_index = state.profile;
+#endif
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 
