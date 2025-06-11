@@ -24,9 +24,9 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
     // Draw widgets
-    draw_wpm(canvas, state);
-    draw_layer(canvas, state);
-    draw_profile(canvas, state);
+    draw_wpm_status(canvas, state);
+    draw_layer_status(canvas, state);
+    draw_profile_status(canvas, state);
     draw_output_status(canvas, state);
 
     // Rotate for horizontal display
@@ -37,7 +37,7 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
  * WPM status
  **/
 static void set_wpm_status(struct zmk_widget_screen_peripheral *widget, struct wpm_status_state state) {
-    widget->state.wpm = state.wpm;
+    widget->state.wpm[9] = state.wpm;
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 
