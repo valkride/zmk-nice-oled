@@ -48,7 +48,7 @@ static void wpm_status_update_cb(struct wpm_status_state state) {
 
 static struct wpm_status_state wpm_status_get_state(const zmk_event_t *eh) {
     const struct zmk_wpm_state_changed *ev = as_zmk_wpm_state_changed(eh);
-    return (struct wpm_status_state){.wpm = (ev != NULL) ? ev->wpm : 0};
+    return (struct wpm_status_state){.wpm = (ev != NULL) ? ev->state : 0};
 };
 
 ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status, struct wpm_status_state, wpm_status_update_cb, wpm_status_get_state)
