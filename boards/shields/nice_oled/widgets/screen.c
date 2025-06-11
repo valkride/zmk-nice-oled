@@ -28,15 +28,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
 /**
- * luna
- **/
-
-#if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_WPM)
-#include "luna.h"
-static struct zmk_widget_luna luna_widget;
-#endif
-
-/**
  * modifiers
  **/
 #if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_MODIFIERS_INDICATORS)
@@ -219,11 +210,6 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     widget_layer_status_init();
     widget_output_status_init();
     widget_wpm_status_init();
-
-#if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_WPM)
-    zmk_widget_luna_init(&luna_widget, canvas);
-    lv_obj_align(zmk_widget_luna_obj(&luna_widget), LV_ALIGN_TOP_LEFT, 36, 0);
-#endif
 
 #if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_HID_INDICATORS)
     zmk_widget_hid_indicators_init(&hid_indicators_widget, canvas);

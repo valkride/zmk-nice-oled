@@ -1,4 +1,3 @@
-
 if SHIELD_NICE_OLED
 
 config LV_Z_VDB_SIZE
@@ -112,18 +111,6 @@ config NICE_OLED_WIDGET_WPM
 
 if NICE_OLED_WIDGET_WPM
 
-config NICE_OLED_WIDGET_WPM_LUNA
-    bool "Enable wpm luna"
-    default y
-
-if NICE_OLED_WIDGET_WPM_LUNA
-
-config NICE_OLED_WIDGET_WPM_LUNA_ANIMATION_MS
-    int "Luna Animation in ms for WPM Widget"
-    default 300
-
-endif # NICE_OLED_WIDGET_WPM_LUNA
-
 endif # NICE_OLED_WIDGET_WPM
 
 ### NICE OLED WIDGET HID INDICATORS
@@ -137,22 +124,6 @@ config ZMK_HID_INDICATORS
     bool "Enable HID indicators"
     default y
 
-config NICE_OLED_WIDGET_HID_INDICATORS_LUNA
-    bool "Enable HID indicators luna"
-    default y
-
-config NICE_OLED_WIDGET_HID_INDICATORS_LUNA_ONLY_CAPSLOCK
-    bool "Enable HID indicators luna only on CapsLock"
-    default n
-
-if NICE_OLED_WIDGET_HID_INDICATORS_LUNA
-
-config NICE_OLED_WIDGET_HID_INDICATORS_LUNA_ANIMATION_MS
-    int "Luna Animation in ms for HID Indicators"
-    default 300
-
-endif # NICE_OLED_WIDGET_HID_INDICATORS_LUNA
-
 endif # NICE_OLED_WIDGET_HID_INDICATORS
 
 ### NICE OLED WIDGET MODIFIERS INDICATORS
@@ -162,17 +133,6 @@ config NICE_OLED_WIDGET_MODIFIERS_INDICATORS
 
 if NICE_OLED_WIDGET_MODIFIERS_INDICATORS
 
-config NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA
-    bool "Enable modifiers indicators luna"
-    default y
-
-if NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA
-
-config NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA_ANIMATION_MS
-    int "Luna Animation in ms for Modifiers Indicators"
-    default 300
-
-endif # NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA
 endif # NICE_OLED_WIDGET_MODIFIERS_INDICATORS
 endif # !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
 endif # SHIELD_NICE_OLED

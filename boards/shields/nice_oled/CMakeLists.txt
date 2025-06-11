@@ -22,9 +22,6 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
 
     target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_HID_INDICATORS app PRIVATE widgets/hid_indicators.c)
     target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_MODIFIERS_INDICATORS app PRIVATE widgets/modifiers.c)
-    zephyr_library_sources(assets/luna_images.c)
-    target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_MASTER_TEST app PRIVATE widgets/luna_dev.c)
-    target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_WPM app PRIVATE widgets/luna.c)
 
     zephyr_library_sources(widgets/layer.c)
     zephyr_library_sources(widgets/profile.c)
