@@ -3,18 +3,16 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-#include <zmk/battery.h>
-#include <zmk/ble.h>
 #include <zmk/display.h>
 #include <zmk/event_manager.h>
-#include <zmk/events/battery_state_changed.h>
-#include <zmk/events/split_peripheral_status_changed.h>
-#include <zmk/events/usb_conn_state_changed.h>
-#include <zmk/split/bluetooth/peripheral.h>
-#include <zmk/usb.h>
+#include <zmk/events/wpm_state_changed.h>
+#include <zmk/events/layer_state_changed.h>
+#include <zmk/events/profile_state_changed.h>
+#include <zmk/events/output_status_changed.h>
 
-#include "animation.h"
-#include "battery.h"
+#include "wpm.h"
+#include "layer.h"
+#include "profile.h"
 #include "output.h"
 #include "screen_peripheral.h"
 
@@ -23,88 +21,107 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 /**
  * Draw canvas
  **/
-
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
     // Draw widgets
-    draw_background(canvas);
+    draw_wpm(canvas, state);
+    draw_layer(canvas, state);
+    draw_profile(canvas, state);
     draw_output_status(canvas, state);
-    draw_battery_status(canvas, state);
 
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
 }
 
 /**
- * Battery status
+ * WPM status
  **/
-
-static void set_battery_status(struct zmk_widget_screen *widget,
-                               struct battery_status_state state) {
-
-#if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
-    widget->state.charging = state.usb_present;
-#endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
-
-    widget->state.battery = state.level;
-
+static void set_wpm_status(struct zmk_widget_screen_peripheral *widget, struct wpm_status_state state) {
+    widget->state.wpm = state.wpm;
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 
-static void battery_status_update_cb(struct battery_status_state state) {
-    struct zmk_widget_screen *widget;
-    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_battery_status(widget, state); }
+static void wpm_status_update_cb(struct wpm_status_state state) {
+    struct zmk_widget_screen_peripheral *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_wpm_status(widget, state); }
 }
 
-static struct battery_status_state battery_status_get_state(const zmk_event_t *eh) {
-    const struct zmk_battery_state_changed *ev = as_zmk_battery_state_changed(eh);
+static struct wpm_status_state wpm_status_get_state(const zmk_event_t *eh) {
+    const struct zmk_wpm_state_changed *ev = as_zmk_wpm_state_changed(eh);
+    return (struct wpm_status_state){.wpm = (ev != NULL) ? ev->wpm : 0};
+};
 
-    return (struct battery_status_state){
-        .level = (ev != NULL) ? ev->state_of_charge : zmk_battery_state_of_charge(),
-#if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
-        .usb_present = zmk_usb_is_powered(),
-#endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
-    };
-}
-
-ZMK_DISPLAY_WIDGET_LISTENER(widget_battery_status, struct battery_status_state,
-                            battery_status_update_cb, battery_status_get_state);
-
-ZMK_SUBSCRIPTION(widget_battery_status, zmk_battery_state_changed);
-#if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
-ZMK_SUBSCRIPTION(widget_battery_status, zmk_usb_conn_state_changed);
-#endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
+ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status, struct wpm_status_state, wpm_status_update_cb, wpm_status_get_state)
+ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
 
 /**
- * Peripheral status
+ * Layer status
  **/
-
-static struct peripheral_status_state get_state(const zmk_event_t *_eh) {
-    return (struct peripheral_status_state){.connected = zmk_split_bt_peripheral_is_connected()};
-}
-
-static void set_connection_status(struct zmk_widget_screen *widget,
-                                  struct peripheral_status_state state) {
-    widget->state.connected = state.connected;
-
+static void set_layer_status(struct zmk_widget_screen_peripheral *widget, struct layer_status_state state) {
+    widget->state.layer = state.layer;
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 
-static void output_status_update_cb(struct peripheral_status_state state) {
-    struct zmk_widget_screen *widget;
-    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_connection_status(widget, state); }
+static void layer_status_update_cb(struct layer_status_state state) {
+    struct zmk_widget_screen_peripheral *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_layer_status(widget, state); }
 }
 
-ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_state,
-                            output_status_update_cb, get_state)
-ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
+static struct layer_status_state layer_status_get_state(const zmk_event_t *eh) {
+    const struct zmk_layer_state_changed *ev = as_zmk_layer_state_changed(eh);
+    return (struct layer_status_state){.layer = (ev != NULL) ? ev->layer : 0};
+};
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_layer_status, struct layer_status_state, layer_status_update_cb, layer_status_get_state)
+ZMK_SUBSCRIPTION(widget_layer_status, zmk_layer_state_changed);
+
+/**
+ * Profile status
+ **/
+static void set_profile_status(struct zmk_widget_screen_peripheral *widget, struct profile_status_state state) {
+    widget->state.profile = state.profile;
+    draw_canvas(widget->obj, widget->cbuf, &widget->state);
+}
+
+static void profile_status_update_cb(struct profile_status_state state) {
+    struct zmk_widget_screen_peripheral *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_profile_status(widget, state); }
+}
+
+static struct profile_status_state profile_status_get_state(const zmk_event_t *eh) {
+    const struct zmk_profile_state_changed *ev = as_zmk_profile_state_changed(eh);
+    return (struct profile_status_state){.profile = (ev != NULL) ? ev->profile : 0};
+};
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_profile_status, struct profile_status_state, profile_status_update_cb, profile_status_get_state)
+ZMK_SUBSCRIPTION(widget_profile_status, zmk_profile_state_changed);
+
+/**
+ * Output status
+ **/
+static void set_output_status(struct zmk_widget_screen_peripheral *widget, struct output_status_state state) {
+    widget->state.output = state.output;
+    draw_canvas(widget->obj, widget->cbuf, &widget->state);
+}
+
+static void output_status_update_cb(struct output_status_state state) {
+    struct zmk_widget_screen_peripheral *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_output_status(widget, state); }
+}
+
+static struct output_status_state output_status_get_state(const zmk_event_t *eh) {
+    const struct zmk_output_status_changed *ev = as_zmk_output_status_changed(eh);
+    return (struct output_status_state){.output = (ev != NULL) ? ev->output : 0};
+};
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_output_status, struct output_status_state, output_status_update_cb, output_status_get_state)
+ZMK_SUBSCRIPTION(widget_output_status, zmk_output_status_changed);
 
 /**
  * Initialization
  **/
-
-int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
+int zmk_widget_screen_peripheral_init(struct zmk_widget_screen_peripheral *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
     lv_obj_set_size(widget->obj, CANVAS_HEIGHT, CANVAS_WIDTH);
 
@@ -113,11 +130,13 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
 
     sys_slist_append(&widgets, &widget->node);
-    draw_animation(canvas, widget);
-    widget_battery_status_init();
-    widget_peripheral_status_init();
+
+    widget_wpm_status_init();
+    widget_layer_status_init();
+    widget_profile_status_init();
+    widget_output_status_init();
 
     return 0;
 }
 
-lv_obj_t *zmk_widget_screen_obj(struct zmk_widget_screen *widget) { return widget->obj; }
+lv_obj_t *zmk_widget_screen_peripheral_obj(struct zmk_widget_screen_peripheral *widget) { return widget->obj; }
