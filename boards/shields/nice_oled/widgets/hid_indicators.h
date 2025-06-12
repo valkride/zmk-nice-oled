@@ -8,6 +8,11 @@
 
 #include <lvgl.h>
 #include <zephyr/kernel.h>
+#include <zmk/hid_indicators_types.h>
+
+struct hid_indicators_state {
+    zmk_hid_indicators_t hid_indicators;
+};
 
 struct zmk_widget_hid_indicators {
     sys_snode_t node;
