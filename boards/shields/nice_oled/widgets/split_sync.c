@@ -1,6 +1,6 @@
 // split_sync.c - Propagate WPM, layer, and profile from central to peripheral
-#include <zmk/split/bluetooth/central.h>
-#include <zmk/split/bluetooth/peripheral.h>
+#include <zmk/split/central.h>
+#include <zmk/split/peripheral.h>
 #include <zmk/events/wpm_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/ble_active_profile_changed.h>
@@ -32,7 +32,8 @@ static int split_sync_event_listener(const zmk_event_t *eh) {
         changed = true;
     }
     if (changed) {
-        zmk_split_bt_send_data((uint8_t *)&sync_state, sizeof(sync_state));
+        // TODO: Implement split data send using ZMK split transport API
+        // Example: zmk_split_central_send_custom_data((uint8_t *)&sync_state, sizeof(sync_state));
     }
     return 0;
 }
@@ -44,13 +45,12 @@ ZMK_SUBSCRIPTION(split_sync, zmk_ble_active_profile_changed);
 #endif
 
 #if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_PERIPHERAL)
-void zmk_split_bt_receive_data(const uint8_t *data, size_t len) {
-    if (len == sizeof(sync_state)) {
-        memcpy(&sync_state, data, sizeof(sync_state));
-        // You must now update your widget state and redraw using sync_state
-        // For example, call a function to update the OLED state
-    }
-}
+// TODO: Implement split data receive using ZMK split transport API
+// void zmk_split_peripheral_receive_custom_data(const uint8_t *data, size_t len) {
+//     if (len == sizeof(sync_state)) {
+//         memcpy(&sync_state, data, sizeof(sync_state));
+//     }
+// }
 #endif
 
 // Provide accessors for your widgets
