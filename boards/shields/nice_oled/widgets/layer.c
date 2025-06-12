@@ -10,20 +10,21 @@ void draw_layer_status(lv_obj_t *canvas, const struct status_state *state) {
                  LV_TEXT_ALIGN_LEFT);
 
   char text[14] = {};
-  int result;
+  int result = 0;
 
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
   if (state->layer_label == NULL) {
     result = snprintf(text, sizeof(text), "Layer %i", state->layer_index);
   } else {
     result = snprintf(text, sizeof(text), "%s", state->layer_label);
     for (int i = 0; text[i] != '\0'; i++) {
-      // toupper( ... ): This function, found in the ctype.h library, takes a
-      // character as an argument and converts it to its uppercase equivalent.
-      // If the character is already uppercase or not a letter, the function
-      // returns it unchanged.
       text[i] = toupper(text[i]);
     }
   }
+#else
+  // Peripheral: no layer info available
+  snprintf(text, sizeof(text), "Layer");
+#endif
 
   if (result >= sizeof(text)) {
     LV_LOG_WARN("truncated");
