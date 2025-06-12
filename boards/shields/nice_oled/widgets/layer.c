@@ -12,7 +12,6 @@ void draw_layer_status(lv_obj_t *canvas, const struct status_state *state) {
   char text[14] = {};
   int result = 0;
 
-#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
   if (state->layer_label == NULL) {
     result = snprintf(text, sizeof(text), "Layer %i", state->layer_index);
   } else {
@@ -21,10 +20,6 @@ void draw_layer_status(lv_obj_t *canvas, const struct status_state *state) {
       text[i] = toupper(text[i]);
     }
   }
-#else
-  // Peripheral: no layer info available
-  snprintf(text, sizeof(text), "Layer");
-#endif
 
   if (result >= sizeof(text)) {
     LV_LOG_WARN("truncated");
