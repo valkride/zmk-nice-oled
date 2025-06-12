@@ -51,7 +51,7 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     // Draw static debug text at boot to confirm OLED works
     lv_draw_label_dsc_t label_dsc;
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_CENTER);
-    lv_canvas_draw_text(canvas, 0, 0, CANVAS_WIDTH, &label_dsc, "HELLO", LV_LABEL_ALIGN_CENTER);
+    lv_canvas_draw_text(canvas, 0, 0, CANVAS_WIDTH, &label_dsc, "HELLO", LV_TEXT_ALIGN_CENTER);
 
     // Draw widgets
     draw_wpm_status(canvas, state);
