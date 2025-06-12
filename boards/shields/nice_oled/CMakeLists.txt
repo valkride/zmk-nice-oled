@@ -45,16 +45,16 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
 endif()
 
 target_sources(app PRIVATE
-  animation.c
-  battery.c
-  hid_indicators.c
-  layer.c
-  modifiers.c
-  output.c
-  profile.c
-  screen.c
-  screen_peripheral.c
-  util.c
-  wpm.c
-  split_sync.c
+  widgets/animation.c
+  widgets/battery.c
+  widgets/hid_indicators.c
+  widgets/layer.c
+  widgets/modifiers.c
+  widgets/output.c
+  widgets/profile.c
+  widgets/screen.c
+  widgets/screen_peripheral.c
+  widgets/util.c
+  widgets/wpm.c
+  widgets/split_sync.c
 )
