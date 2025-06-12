@@ -43,3 +43,18 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
     zephyr_library_sources(widgets/screen_peripheral.c)
   endif()
 endif()
+
+target_sources(app PRIVATE
+  animation.c
+  battery.c
+  hid_indicators.c
+  layer.c
+  modifiers.c
+  output.c
+  profile.c
+  screen.c
+  screen_peripheral.c
+  util.c
+  wpm.c
+  split_sync.c
+)

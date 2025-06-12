@@ -13,6 +13,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "profile.h"
 #include "output.h"
 #include "screen_peripheral.h"
+#include "split_sync.h"
 
 // Fallback macros for event helpers only
 #ifndef as_zmk_wpm_state_changed
@@ -60,7 +61,11 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
  * WPM status
  **/
 static void set_wpm_status(struct zmk_widget_screen_peripheral *widget, struct wpm_status_state state) {
+#if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_PERIPHERAL)
+    widget->state.wpm[9] = split_sync_get_wpm();
+#else
     widget->state.wpm[9] = state.wpm;
+#endif
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 
@@ -81,8 +86,13 @@ ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
  * Layer status
  **/
 static void set_layer_status(struct zmk_widget_screen_peripheral *widget, struct layer_status_state state) {
+#if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_PERIPHERAL)
+    widget->state.layer_index = split_sync_get_layer();
+    widget->state.layer_label = NULL;
+#else
     widget->state.layer_index = state.index;
     widget->state.layer_label = state.label;
+#endif
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 
@@ -103,7 +113,11 @@ ZMK_SUBSCRIPTION(widget_layer_status, zmk_layer_state_changed);
  * Profile status
  **/
 static void set_profile_status(struct zmk_widget_screen_peripheral *widget, struct profile_status_state state) {
+#if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_PERIPHERAL)
+    widget->state.active_profile_index = split_sync_get_profile();
+#else
     widget->state.active_profile_index = state.profile;
+#endif
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 
