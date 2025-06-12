@@ -14,7 +14,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "output.h"
 #include "screen_peripheral.h"
 
-// Fallback macros for event helpers and event types
+// Fallback macros for event helpers only
 #ifndef as_zmk_wpm_state_changed
 #define as_zmk_wpm_state_changed(eh) ((const struct zmk_wpm_state_changed *)((eh) ? (eh) : NULL))
 #endif
@@ -24,14 +24,9 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #ifndef as_zmk_ble_active_profile_changed
 #define as_zmk_ble_active_profile_changed(eh) ((const struct zmk_ble_active_profile_changed *)((eh) ? (eh) : NULL))
 #endif
-#ifndef zmk_event_zmk_wpm_state_changed
-#define zmk_event_zmk_wpm_state_changed ((const struct zmk_event_type *)0)
-#endif
-#ifndef zmk_event_zmk_layer_state_changed
-#define zmk_event_zmk_layer_state_changed ((const struct zmk_event_type *)0)
-#endif
-#ifndef zmk_event_zmk_ble_active_profile_changed
-#define zmk_event_zmk_ble_active_profile_changed ((const struct zmk_event_type *)0)
+// If ZMK_SUBSCRIPTION is not defined, stub it as a no-op
+#ifndef ZMK_SUBSCRIPTION
+#define ZMK_SUBSCRIPTION(...)
 #endif
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
