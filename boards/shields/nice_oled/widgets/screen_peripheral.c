@@ -1,5 +1,4 @@
 #include <zephyr/kernel.h>
-
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
@@ -14,6 +13,26 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "profile.h"
 #include "output.h"
 #include "screen_peripheral.h"
+
+// Fallback macros for event helpers and event types
+#ifndef as_zmk_wpm_state_changed
+#define as_zmk_wpm_state_changed(eh) ((const struct zmk_wpm_state_changed *)((eh) ? (eh) : NULL))
+#endif
+#ifndef as_zmk_layer_state_changed
+#define as_zmk_layer_state_changed(eh) ((const struct zmk_layer_state_changed *)((eh) ? (eh) : NULL))
+#endif
+#ifndef as_zmk_ble_active_profile_changed
+#define as_zmk_ble_active_profile_changed(eh) ((const struct zmk_ble_active_profile_changed *)((eh) ? (eh) : NULL))
+#endif
+#ifndef zmk_event_zmk_wpm_state_changed
+#define zmk_event_zmk_wpm_state_changed ((const struct zmk_event_type *)0)
+#endif
+#ifndef zmk_event_zmk_layer_state_changed
+#define zmk_event_zmk_layer_state_changed ((const struct zmk_event_type *)0)
+#endif
+#ifndef zmk_event_zmk_ble_active_profile_changed
+#define zmk_event_zmk_ble_active_profile_changed ((const struct zmk_event_type *)0)
+#endif
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
@@ -122,14 +141,3 @@ int zmk_widget_screen_peripheral_init(struct zmk_widget_screen_peripheral *widge
 }
 
 lv_obj_t *zmk_widget_screen_peripheral_obj(struct zmk_widget_screen_peripheral *widget) { return widget->obj; }
-
-// Add static inline stubs for event helpers if not available
-#ifndef as_zmk_wpm_state_changed
-#define as_zmk_wpm_state_changed(eh) ((const struct zmk_wpm_state_changed *)((eh) ? (eh) : NULL))
-#endif
-#ifndef as_zmk_layer_state_changed
-#define as_zmk_layer_state_changed(eh) ((const struct zmk_layer_state_changed *)((eh) ? (eh) : NULL))
-#endif
-#ifndef as_zmk_ble_active_profile_changed
-#define as_zmk_ble_active_profile_changed(eh) ((const struct zmk_ble_active_profile_changed *)((eh) ? (eh) : NULL))
-#endif
