@@ -44,17 +44,19 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
   endif()
 endif()
 
+# Remove widget sources from target_sources(app ...) to avoid multiple definition errors
+# Only add sources here if they are NOT already included via zephyr_library_sources()
 target_sources(app PRIVATE
-  widgets/animation.c
-  widgets/battery.c
-  widgets/hid_indicators.c
-  widgets/layer.c
-  widgets/modifiers.c
-  widgets/output.c
-  widgets/profile.c
-  widgets/screen.c
-  widgets/screen_peripheral.c
-  widgets/util.c
-  widgets/wpm.c
-  widgets/split_sync.c
+  # widgets/animation.c
+  # widgets/battery.c
+  # widgets/hid_indicators.c
+  # widgets/layer.c
+  # widgets/modifiers.c
+  # widgets/output.c
+  # widgets/profile.c
+  # widgets/screen.c
+  # widgets/screen_peripheral.c
+  # widgets/util.c
+  # widgets/wpm.c
+  # widgets/split_sync.c
 )
