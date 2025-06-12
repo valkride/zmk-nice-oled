@@ -68,7 +68,9 @@ static struct peripheral_status_state get_state(const zmk_event_t *_eh) {
     return (struct peripheral_status_state){.connected = zmk_split_bt_peripheral_is_connected()};
 }
 static void set_connection_status(struct zmk_widget_screen *widget, struct peripheral_status_state state) {
+#if IS_ENABLED(CONFIG_ZMK_SPLIT) && !IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     widget->state.connected = state.connected;
+#endif
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 static void output_status_update_cb(struct peripheral_status_state state) {
