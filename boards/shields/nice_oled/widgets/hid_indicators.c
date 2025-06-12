@@ -19,6 +19,8 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #define LED_CLCK 0x02
 #define LED_SLCK 0x04
 
+static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
+
 static void set_hid_indicators(lv_obj_t *label,
                                struct hid_indicators_state state) {
   if (state.hid_indicators & (LED_CLCK | LED_NLCK | LED_SLCK)) {
