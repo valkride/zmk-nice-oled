@@ -24,6 +24,15 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #ifndef as_zmk_ble_active_profile_changed
 #define as_zmk_ble_active_profile_changed(eh) ((const struct zmk_ble_active_profile_changed *)((eh) ? (eh) : NULL))
 #endif
+#ifndef zmk_event_zmk_wpm_state_changed
+#define zmk_event_zmk_wpm_state_changed (*(const struct zmk_event_type *)0)
+#endif
+#ifndef zmk_event_zmk_layer_state_changed
+#define zmk_event_zmk_layer_state_changed (*(const struct zmk_event_type *)0)
+#endif
+#ifndef zmk_event_zmk_ble_active_profile_changed
+#define zmk_event_zmk_ble_active_profile_changed (*(const struct zmk_event_type *)0)
+#endif
 // If ZMK_SUBSCRIPTION is not defined, stub it as a no-op
 #ifndef ZMK_SUBSCRIPTION
 #define ZMK_SUBSCRIPTION(...)
