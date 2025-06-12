@@ -6,11 +6,17 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
   zephyr_library_sources(widgets/output.c)
   zephyr_library_sources(widgets/util.c)
 
+  # Always include these widget sources for all builds
+  zephyr_library_sources(widgets/layer.c)
+  zephyr_library_sources(widgets/profile.c)
+  zephyr_library_sources(widgets/screen.c)
+  zephyr_library_sources(widgets/wpm.c)
+
   if(CONFIG_ZMK_RGB_UNDERGLOW)
   	if((NOT CONFIG_ZMK_SPLIT) OR CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-		# 	target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_LAYER_RGB app PRIVATE rgb/my_rgb_underglow.c)
-                # 	target_target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_LAYER_RGB app PRIVATE rgb/my_layer_rgb.c)
-                # 	target_target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_LAYER_RGB app PRIVATE rgb/layer_rgb.c)
+		#  target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_LAYER_RGB app PRIVATE rgb/my_rgb_underglow.c)
+                #  target_target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_LAYER_RGB app PRIVATE rgb/my_layer_rgb.c)
+                #  target_target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_LAYER_RGB app PRIVATE rgb/layer_rgb.c)
   	endif()
   endif()
 
@@ -22,11 +28,6 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
 
     target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_HID_INDICATORS app PRIVATE widgets/hid_indicators.c)
     target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_MODIFIERS_INDICATORS app PRIVATE widgets/modifiers.c)
-
-    zephyr_library_sources(widgets/layer.c)
-    zephyr_library_sources(widgets/profile.c)
-    zephyr_library_sources(widgets/screen.c)
-    zephyr_library_sources(widgets/wpm.c)
   else()
 
     if(CONFIG_NICE_OLED_WIDGET_PERIPHERAL_TEST)
