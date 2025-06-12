@@ -81,10 +81,8 @@ ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
  * Layer status
  **/
 static void set_layer_status(struct zmk_widget_screen_peripheral *widget, struct layer_status_state state) {
-#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     widget->state.layer_index = state.index;
     widget->state.layer_label = state.label;
-#endif
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 
@@ -105,9 +103,7 @@ ZMK_SUBSCRIPTION(widget_layer_status, zmk_layer_state_changed);
  * Profile status
  **/
 static void set_profile_status(struct zmk_widget_screen_peripheral *widget, struct profile_status_state state) {
-#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     widget->state.active_profile_index = state.profile;
-#endif
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 
