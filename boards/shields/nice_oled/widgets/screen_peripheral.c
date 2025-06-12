@@ -122,3 +122,14 @@ int zmk_widget_screen_peripheral_init(struct zmk_widget_screen_peripheral *widge
 }
 
 lv_obj_t *zmk_widget_screen_peripheral_obj(struct zmk_widget_screen_peripheral *widget) { return widget->obj; }
+
+// Add static inline stubs for event helpers if not available
+#ifndef as_zmk_wpm_state_changed
+#define as_zmk_wpm_state_changed(eh) ((const struct zmk_wpm_state_changed *)((eh) ? (eh) : NULL))
+#endif
+#ifndef as_zmk_layer_state_changed
+#define as_zmk_layer_state_changed(eh) ((const struct zmk_layer_state_changed *)((eh) ? (eh) : NULL))
+#endif
+#ifndef as_zmk_ble_active_profile_changed
+#define as_zmk_ble_active_profile_changed(eh) ((const struct zmk_ble_active_profile_changed *)((eh) ? (eh) : NULL))
+#endif
