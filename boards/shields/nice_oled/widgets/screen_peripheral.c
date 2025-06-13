@@ -46,6 +46,7 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
  * Draw canvas
  **/
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
+    LOG_INF("draw_canvas called");
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
     // Draw static debug text at boot to confirm OLED works
@@ -144,6 +145,7 @@ ZMK_SUBSCRIPTION(widget_profile_status, zmk_ble_active_profile_changed);
  * Initialization
  **/
 int zmk_widget_screen_peripheral_init(struct zmk_widget_screen_peripheral *widget, lv_obj_t *parent) {
+    LOG_INF("zmk_widget_screen_peripheral_init called");
     widget->obj = lv_obj_create(parent);
     lv_obj_set_size(widget->obj, CANVAS_HEIGHT, CANVAS_WIDTH);
 
