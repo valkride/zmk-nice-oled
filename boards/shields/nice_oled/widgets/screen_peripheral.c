@@ -47,7 +47,8 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
  **/
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
-
+    // Clear the canvas to background color before drawing meters
+    lv_canvas_fill_bg(canvas, LVGL_BACKGROUND, LV_OPA_COVER);
     // Only draw meters/info on the peripheral
     draw_wpm_status(canvas, state);
     draw_layer_status(canvas, state);
