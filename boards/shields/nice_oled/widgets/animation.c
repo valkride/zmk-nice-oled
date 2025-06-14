@@ -72,6 +72,8 @@ void draw_animation(lv_obj_t *canvas, struct zmk_widget_screen *widget) {}
 #else
 
 void draw_animation(lv_obj_t *canvas, struct zmk_widget_screen *widget) {
+    // Clear the canvas to transparent or background color before drawing
+    lv_canvas_fill_bg(canvas, LV_COLOR_TRANSP, LV_OPA_COVER);
     /* Declare globally within the function, so that they exist regardless of
      * #if. */
     lv_obj_t *art = NULL;
