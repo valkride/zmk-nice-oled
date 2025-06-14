@@ -9,18 +9,16 @@ LV_IMG_DECLARE(grid);
 static void draw_gauge(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_img_dsc_t img_dsc;
     lv_draw_img_dsc_init(&img_dsc);
-
-    // Move gauge to top (y=0)
-    lv_canvas_draw_img(canvas, 0, 0, &gauge, &img_dsc);
+    // Restore original position (y=70)
+    lv_canvas_draw_img(canvas, 0, 70, &gauge, &img_dsc);
 }
 
 static void draw_needle(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_line_dsc_t line_dsc;
     init_line_dsc(&line_dsc, LVGL_FOREGROUND, 1);
-
-    int centerX = 12;
-    int centerY = 20; // Move needle center to match new gauge position
-    int offset = 5;
+    int centerX = 12; // 16 default
+    int centerY = 90; // 100 gut, 66 default
+    int offset = 5;   // 5 def, largo de la aguja
     int value = state->wpm[9];
 
 #if IS_ENABLED(CONFIG_NICE_OLED_GEM_ANIMATION_WPM_FIXED_RANGE)
@@ -56,8 +54,8 @@ static void draw_needle(lv_obj_t *canvas, const struct status_state *state) {
 static void draw_grid(lv_obj_t *canvas) {
     lv_draw_img_dsc_t img_dsc;
     lv_draw_img_dsc_init(&img_dsc);
-    // Move grid below gauge (y=30)
-    lv_canvas_draw_img(canvas, -1, 30, &grid, &img_dsc);
+    // Restore original position (y=95)
+    lv_canvas_draw_img(canvas, -1, 95, &grid, &img_dsc);
 }
 
 static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
@@ -77,8 +75,8 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
         if (value > max) {
             value = max;
         }
-        points[i].x = 0 + i * 7.4;
-        points[i].y = 50 - (value * 20 / max); // Move graph to y=30-50
+        points[i].x = -36 + i * 7.4;
+        points[i].y = 127 - (value * 32 / max);
     }
 #else
     int max = 0;
@@ -100,7 +98,7 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
 
     for (int i = 0; i < 10; i++) {
         points[i].x = 0 + i * 7.4;
-        points[i].y = 50 - (state->wpm[i] - min) * 20 / range;
+        points[i].y = 97 - (state->wpm[i] - min) * 32 / range;
     }
 #endif
 
@@ -114,13 +112,13 @@ static void draw_label(lv_obj_t *canvas, const struct status_state *state) {
     char wpm_text[10] = {};
 
     snprintf(wpm_text, sizeof(wpm_text), "%d", state->wpm[9]);
-    // Place label below graph (y=55)
+    // Restore original label positions (y=75)
     if (state->wpm[9] < 10) {
-        lv_canvas_draw_text(canvas, 12, 55, 50, &label_dsc_wpm, wpm_text);
+        lv_canvas_draw_text(canvas, 12, 75, 50, &label_dsc_wpm, wpm_text);
     } else if (state->wpm[9] >= 10 && state->wpm[9] < 100) {
-        lv_canvas_draw_text(canvas, 9, 55, 50, &label_dsc_wpm, wpm_text);
+        lv_canvas_draw_text(canvas, 9, 75, 50, &label_dsc_wpm, wpm_text);
     } else {
-        lv_canvas_draw_text(canvas, 7, 55, 50, &label_dsc_wpm, wpm_text);
+        lv_canvas_draw_text(canvas, 7, 75, 50, &label_dsc_wpm, wpm_text);
     }
 }
 
