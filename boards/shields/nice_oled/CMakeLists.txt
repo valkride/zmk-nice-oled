@@ -40,8 +40,9 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
     zephyr_library_sources(assets/vip_marcos.c)
     zephyr_library_sources(assets/pokemon.c)
     zephyr_library_sources(widgets/animation.c)
-    zephyr_library_sources(widgets/screen_peripheral.c)
   endif()
+
+  zephyr_library_sources(widgets/screen_peripheral.c)
 endif()
 
 # Remove widget sources from target_sources(app ...) to avoid multiple definition errors
