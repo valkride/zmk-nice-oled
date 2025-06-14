@@ -25,5 +25,6 @@ void draw_layer_status(lv_obj_t *canvas, const struct status_state *state) {
     LV_LOG_WARN("truncated");
   }
 
-  lv_canvas_draw_text(canvas, 0, 146, 68, &label_dsc, text);
+  // Move layer label to y=80
+  lv_canvas_draw_text(canvas, 0, 80, 68, &label_dsc, text);
 }
