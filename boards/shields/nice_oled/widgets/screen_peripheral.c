@@ -13,7 +13,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "profile.h"
 #include "output.h"
 #include "screen_peripheral.h"
-#include "split_sync.h"
 #include "../assets/custom_fonts.h" // Add this line to declare pixel_operator_mono_16
 
 // Fallback macros for event helpers only
