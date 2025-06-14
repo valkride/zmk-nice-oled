@@ -64,7 +64,7 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_CENTER);
     lv_canvas_draw_text(canvas, 0, 0, CANVAS_WIDTH, &label_dsc, "HELLO");
 
-    // Draw widgets
+    // Draw widgets (WPM, layer, profile, output status)
     draw_wpm_status(canvas, state);
     draw_layer_status(canvas, state);
     draw_profile_status(canvas, state);
