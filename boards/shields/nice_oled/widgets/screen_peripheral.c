@@ -46,25 +46,9 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
  * Draw canvas
  **/
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
-    LOG_INF("draw_canvas called");
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
-    // Fill canvas with a solid color for debug
-    lv_draw_rect_dsc_t rect_dsc;
-    init_rect_dsc(&rect_dsc, LVGL_FOREGROUND);
-    lv_canvas_draw_rect(canvas, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, &rect_dsc);
-
-    // Draw a smaller rectangle in the opposite color
-    lv_draw_rect_dsc_t rect_dsc2;
-    init_rect_dsc(&rect_dsc2, LVGL_BACKGROUND);
-    lv_canvas_draw_rect(canvas, 10, 10, CANVAS_WIDTH-20, CANVAS_HEIGHT-20, &rect_dsc2);
-
-    // Draw static debug text at boot to confirm OLED works
-    lv_draw_label_dsc_t label_dsc;
-    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_CENTER);
-    lv_canvas_draw_text(canvas, 0, 0, CANVAS_WIDTH, &label_dsc, "HELLO");
-
-    // Draw widgets (WPM, layer, profile, output status)
+    // Only draw meters/info on the peripheral, no debug fill, no art
     draw_wpm_status(canvas, state);
     draw_layer_status(canvas, state);
     draw_profile_status(canvas, state);
