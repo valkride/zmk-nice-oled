@@ -43,10 +43,18 @@ ZMK_SUBSCRIPTION(split_sync, zmk_ble_active_profile_changed);
 #endif
 
 #if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_PERIPHERAL)
-#include <zmk/split/peripheral.h>
+#include <zephyr/logging/log.h>
+extern sys_slist_t widgets; // from screen_peripheral.c
 void zmk_split_peripheral_receive_custom_data(const uint8_t *data, size_t len) {
+    LOG_INF("[split_sync] Received custom data, len=%d", len);
     if (len == sizeof(sync_state)) {
         memcpy(&sync_state, data, sizeof(sync_state));
+        LOG_INF("[split_sync] Updated sync_state: wpm=%d layer=%d profile=%d", sync_state.wpm, sync_state.layer, sync_state.profile);
+        // Force redraw of all screen_peripheral widgets
+        struct zmk_widget_screen_peripheral *widget;
+        SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
+            draw_canvas(widget->obj, widget->cbuf, (const struct status_state *)&widget->state);
+        }
     }
 }
 #endif
