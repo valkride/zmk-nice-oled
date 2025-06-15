@@ -47,11 +47,11 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
     lv_canvas_fill_bg(canvas, LVGL_BACKGROUND, LV_OPA_COVER);
-    // Peripheral OLED: show all meters, stacked, ZMK style
-    draw_wpm_status(canvas, state, 0);      // Top
-    draw_layer_status(canvas, state, 40);   // Below WPM
-    draw_profile_status(canvas, state, 80); // Below Layer
-    draw_output_status(canvas, state, 120); // Bottom
+    // Peripheral OLED: show all meters, stacked, ZMK style with more spacing
+    draw_wpm_status(canvas, state, 0);      // Top (WPM gauge + graph takes ~35px)
+    draw_layer_status(canvas, state, 35);   // Below WPM 
+    draw_profile_status(canvas, state, 50); // Below Layer (text + bar takes ~15px)
+    draw_output_status(canvas, state, 70);  // Bottom (just text, takes ~15px)
     rotate_canvas(canvas, cbuf);
 }
 
