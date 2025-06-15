@@ -27,14 +27,9 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
-    // Peripheral display: Enhanced layout with available data
-    // Show background
+    // Draw widgets
     draw_background(canvas);
-    
-    // Show output status (connection info)
     draw_output_status(canvas, state);
-    
-    // Show battery status (prominent display)
     draw_battery_status(canvas, state);
 
     // Rotate for horizontal display
@@ -115,7 +110,9 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
 
     lv_obj_t *canvas = lv_canvas_create(widget->obj);
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
+    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
+
+    sys_slist_append(&widgets, &widget->node);
     draw_animation(canvas, widget);
     widget_battery_status_init();
     widget_peripheral_status_init();

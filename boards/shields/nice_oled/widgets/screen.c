@@ -60,21 +60,13 @@ static struct zmk_widget_hid_indicators hid_indicators_widget;
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
-#if IS_ENABLED(CONFIG_ZMK_SPLIT) && !IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    // Peripheral (left) display: Show all meters in stacked layout (original ZMK style)
-    draw_output_status(canvas, state);
-    draw_wpm_status(canvas, state);
-    draw_battery_status(canvas, state);
-    draw_profile_status(canvas, state);
-    draw_layer_status(canvas, state);
-#else
-    // Central/Main (right) display: Show simple layout with activity bar + layer squares + letters
+    // Central/Main (right) display: Show simple layout with activity bar, battery, and basic info
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
-    draw_profile_status(canvas, state);
+    
+    // Show layer info as simple indicators
     draw_layer_status(canvas, state);
-#endif
 
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
