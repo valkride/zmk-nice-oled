@@ -46,11 +46,18 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
     lv_canvas_fill_bg(canvas, LVGL_BACKGROUND, LV_OPA_COVER);
-    // Peripheral OLED: show WPM, layer, and profile meters only (no output status)
-    draw_wpm_status(canvas, state, 0);      // Top (WPM gauge + graph takes ~35px)
-    draw_layer_status(canvas, state, 35);   // Below WPM 
-    draw_profile_status(canvas, state, 50); // Below Layer (text + bar takes ~15px)
-    // Note: No output status on peripheral since it doesn't have endpoint info
+    
+    // Simple test: just draw "PERIPH" text
+    lv_draw_label_dsc_t label_dsc;
+    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
+    lv_canvas_draw_text(canvas, 0, 0, CANVAS_WIDTH, &label_dsc, "PERIPH");
+    lv_canvas_draw_text(canvas, 0, 15, CANVAS_WIDTH, &label_dsc, "SCREEN");
+    
+    // Original complex drawing (commented out for testing)
+    // draw_wpm_status(canvas, state, 0);      // Top (WPM gauge + graph takes ~35px)
+    // draw_layer_status(canvas, state, 35);   // Below WPM 
+    // draw_profile_status(canvas, state, 50); // Below Layer (text + bar takes ~15px)
+    
     rotate_canvas(canvas, cbuf);
 }
 
@@ -129,11 +136,13 @@ int zmk_widget_screen_peripheral_init(struct zmk_widget_screen_peripheral *widge
     lv_obj_t *canvas = lv_canvas_create(widget->obj);
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
     
-    sys_slist_append(&widgets, &widget->node);
-
-    widget_wpm_status_init();
+    sys_slist_append(&widgets, &widget->node);    widget_wpm_status_init();
     widget_peripheral_layer_status_init();
-    widget_profile_status_init();
+    widget_profile_status_init();    // Force initial drawing with default values
+    widget->state.wpm[9] = 0;  // Default WPM
+    widget->state.layer_index = 0;  // Default layer
+    widget->state.active_profile_index = 0;  // Default profile
+    draw_canvas(widget->obj, widget->cbuf, &widget->state);
 
     return 0;
 }

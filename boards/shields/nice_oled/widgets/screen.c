@@ -48,24 +48,31 @@ static void draw_activity_bar(lv_obj_t *canvas, const struct status_state *state
     
     // Create single line with bluetooth symbol and battery percentage
     char display_text[20] = {};
-    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    // Only show connection status on central/main keyboard
-    if (state->selected_endpoint.transport == 1) { // USB
-        sprintf(display_text, "\xEF\x87\xAB " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery); // USB icon + battery
-    } else if (state->selected_endpoint.transport == 2) { // BLE
-        if (state->active_profile_connected) {
-            sprintf(display_text, "\xEF\x8A\x94 " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery); // Bluetooth icon + battery
-        } else {
-            sprintf(display_text, "\xEF\x87\xB6 " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery); // Disconnected icon + battery
-        }
+    
+    // Always show some text for testing
+    if (state == NULL) {
+        sprintf(display_text, "TEST 50%%");
     } else {
-        sprintf(display_text, "? " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery);
+        #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+        // Only show connection status on central/main keyboard
+        if (state->selected_endpoint.transport == 1) { // USB
+            sprintf(display_text, "\xEF\x87\xAB " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery); // USB icon + battery
+        } else if (state->selected_endpoint.transport == 2) { // BLE
+            if (state->active_profile_connected) {
+                sprintf(display_text, "\xEF\x8A\x94 " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery); // Bluetooth icon + battery
+            } else {
+                sprintf(display_text, "\xEF\x87\xB6 " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery); // Disconnected icon + battery
+            }
+        } else {
+            sprintf(display_text, "? " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery);
+        }
+        #else
+        // For peripheral, show PER
+        sprintf(display_text, "P " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery);
+        #endif
     }
-    #else
-    // For peripheral, show PER
-    sprintf(display_text, "P " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery);
-    #endif
-      // Draw the complete status line at top-left
+    
+    // Draw the complete status line at top-left
     lv_canvas_draw_text(canvas, 0, 0, CANVAS_WIDTH, &label_dsc, display_text);
 }
 
@@ -113,10 +120,18 @@ static void draw_layer_letters(lv_obj_t *canvas, const struct status_state *stat
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
     lv_canvas_fill_bg(canvas, LVGL_BACKGROUND, LV_OPA_COVER);
-    // Main OLED: show activity bar, layer squares, and layer letters
-    draw_activity_bar(canvas, state);
-    draw_layer_squares(canvas, state);
-    draw_layer_letters(canvas, state);
+    
+    // Simple test: just draw "MAIN" text
+    lv_draw_label_dsc_t label_dsc;
+    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
+    lv_canvas_draw_text(canvas, 0, 0, CANVAS_WIDTH, &label_dsc, "MAIN");
+    lv_canvas_draw_text(canvas, 0, 15, CANVAS_WIDTH, &label_dsc, "SCREEN");
+    
+    // Original complex drawing (commented out for testing)
+    // draw_activity_bar(canvas, state);
+    // draw_layer_squares(canvas, state);
+    // draw_layer_letters(canvas, state);
+    
     rotate_canvas(canvas, cbuf);
 }
 
@@ -239,22 +254,33 @@ ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
  * Initialization
  **/
 int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
+    LOG_INF("zmk_widget_screen_init called - initializing main screen");
+    
     widget->obj = lv_obj_create(parent);
     lv_obj_set_size(widget->obj, CANVAS_WIDTH, CANVAS_HEIGHT);
     lv_obj_t *canvas = lv_canvas_create(widget->obj);
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
     lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
     
+    LOG_INF("Main screen canvas created, size: %dx%d", CANVAS_WIDTH, CANVAS_HEIGHT);
+    
     sys_slist_append(&widgets, &widget->node);
 #if defined(draw_animation)
     draw_animation(canvas, widget);
 #endif
-      widget_battery_status_init();
+    
+    widget_battery_status_init();
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     widget_main_output_status_init();
-#endif
-    widget_main_layer_status_init();
+#endif    widget_main_layer_status_init();
     widget_peripheral_status_init();
+    
+    // Force initial drawing with default values
+    widget->state.battery = 50;  // Default battery level
+    widget->state.layer_index = 0;  // Default layer
+    draw_canvas(widget->obj, widget->cbuf, &widget->state);
+    
+    LOG_INF("Main screen initialization completed");
     return 0;
 }
 lv_obj_t *zmk_widget_screen_obj(struct zmk_widget_screen *widget) { return widget->obj; }
