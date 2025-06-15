@@ -7,6 +7,11 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/wpm_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/ble_active_profile_changed.h>
+#include <zmk/events/endpoint_changed.h>
+#include <zmk/events/usb_conn_state_changed.h>
+#include <zmk/ble.h>
+#include <zmk/endpoints.h>
+#include <zmk/usb.h>
 
 #include "wpm.h"
 #include "layer.h"
@@ -120,6 +125,40 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_profile_status, struct profile_status_state, 
 ZMK_SUBSCRIPTION(widget_profile_status, zmk_ble_active_profile_changed);
 
 /**
+ * Output status (for bluetooth/USB icons)
+ **/
+static void set_output_status(struct zmk_widget_screen_peripheral *widget, struct output_status_state state) {
+    widget->state.selected_endpoint = state.selected_endpoint;
+    widget->state.active_profile_index = state.active_profile_index;
+    widget->state.active_profile_connected = state.active_profile_connected;
+    widget->state.active_profile_bonded = state.active_profile_bonded;
+    draw_canvas(widget->obj, widget->cbuf, &widget->state);
+}
+
+static void output_status_update_cb(struct output_status_state state) {
+    struct zmk_widget_screen_peripheral *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_output_status(widget, state); }
+}
+
+static struct output_status_state output_status_get_state(const zmk_event_t *eh) {
+    return (struct output_status_state){
+        .selected_endpoint = zmk_endpoints_selected(),
+        .active_profile_index = zmk_ble_active_profile_index(),
+        .active_profile_connected = zmk_ble_active_profile_is_connected(),
+        .active_profile_bonded = !zmk_ble_active_profile_is_open(),
+    };
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_output_status, struct output_status_state, output_status_update_cb, output_status_get_state)
+ZMK_SUBSCRIPTION(widget_output_status, zmk_endpoint_changed);
+#if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
+ZMK_SUBSCRIPTION(widget_output_status, zmk_usb_conn_state_changed);
+#endif
+#if defined(CONFIG_ZMK_BLE)
+ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
+#endif
+
+/**
  * Initialization
  **/
 int zmk_widget_screen_peripheral_init(struct zmk_widget_screen_peripheral *widget, lv_obj_t *parent) {
@@ -129,13 +168,12 @@ int zmk_widget_screen_peripheral_init(struct zmk_widget_screen_peripheral *widge
 
     lv_obj_t *canvas = lv_canvas_create(widget->obj);
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
-
-    sys_slist_append(&widgets, &widget->node);
+    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
 
     widget_wpm_status_init();
     widget_layer_status_init();
     widget_profile_status_init();
+    widget_output_status_init();
 
     return 0;
 }
