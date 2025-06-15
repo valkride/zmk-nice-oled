@@ -40,7 +40,8 @@ void draw_profile_status(lv_obj_t *canvas, const struct status_state *state, int
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
 
     char text[16] = {};
-    int result = snprintf(text, sizeof(text), "Profile: %s", state->profile_label ? state->profile_label : "N/A");
+    // Use the profile index for display, since status_state has no profile_label
+    int result = snprintf(text, sizeof(text), "Profile: %d", state->active_profile_index + 1);
     if (result >= sizeof(text)) {
         LV_LOG_WARN("truncated");
     }
