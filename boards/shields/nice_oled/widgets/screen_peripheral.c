@@ -44,31 +44,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #define ZMK_SUBSCRIPTION(...)
 #endif
 
-// Add fallback function declarations if not available
-#ifndef zmk_endpoints_selected
-static inline struct zmk_endpoint_instance zmk_endpoints_selected(void) {
-    return (struct zmk_endpoint_instance){.transport = 2}; // Default to BLE
-}
-#endif
-
-#ifndef zmk_ble_active_profile_index
-static inline int zmk_ble_active_profile_index(void) {
-    return 0; // Default profile
-}
-#endif
-
-#ifndef zmk_ble_active_profile_is_connected
-static inline bool zmk_ble_active_profile_is_connected(void) {
-    return true; // Default connected
-}
-#endif
-
-#ifndef zmk_ble_active_profile_is_open
-static inline bool zmk_ble_active_profile_is_open(void) {
-    return false; // Default bonded
-}
-#endif
-
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
 /**
