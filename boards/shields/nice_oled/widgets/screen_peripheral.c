@@ -47,20 +47,11 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
     lv_canvas_fill_bg(canvas, LVGL_BACKGROUND, LV_OPA_COVER);
-    // Draw WPM meter at the top
-    lv_obj_set_y(canvas, 0);
-    draw_wpm_status(canvas, state);
-    // Draw layer status below WPM
-    lv_obj_set_y(canvas, 50);
-    draw_layer_status(canvas, state);
-    // Draw profile status below layer
-    lv_obj_set_y(canvas, 90);
-    draw_profile_status(canvas, state);
-    // Draw output status at the bottom
-    lv_obj_set_y(canvas, 130);
-    draw_output_status(canvas, state);
-    // Reset position for next draw
-    lv_obj_set_y(canvas, 0);
+    // Draw each widget at a fixed Y offset
+    draw_wpm_status(canvas, state, 0);      // Top
+    draw_layer_status(canvas, state, 40);   // Below WPM
+    draw_profile_status(canvas, state, 80); // Below Layer
+    draw_output_status(canvas, state, 120); // Bottom
     rotate_canvas(canvas, cbuf);
 }
 

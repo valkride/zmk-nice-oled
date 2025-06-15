@@ -7,4 +7,4 @@ struct profile_status_state {
     int profile;
 };
 
-void draw_profile_status(lv_obj_t *canvas, const struct status_state *state);
+void draw_profile_status(lv_obj_t *canvas, const struct status_state *state, int y_offset);
