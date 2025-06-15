@@ -24,7 +24,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "profile.h"
 #include "screen.h"
 #include "wpm.h"
-#include "../assets/custom_fonts.h"
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
@@ -55,89 +54,18 @@ static struct zmk_widget_hid_indicators hid_indicators_widget;
 #endif
 
 /**
- * Simple layout functions for central/main display
- **/
-
-static void draw_simple_status(lv_obj_t *canvas, const struct status_state *state) {
-    lv_draw_label_dsc_t label_dsc;
-    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
-    
-    char display_text[30] = {};
-    
-    // Create status line with bluetooth icon and battery percentage
-    if (state->selected_endpoint.transport == ZMK_TRANSPORT_USB) {
-        snprintf(display_text, sizeof(display_text), "USB %d%%", state->battery);
-    } else if (state->selected_endpoint.transport == ZMK_TRANSPORT_BLE) {
-        if (state->active_profile_connected) {
-            snprintf(display_text, sizeof(display_text), "BT %d%%", state->battery);
-        } else {
-            snprintf(display_text, sizeof(display_text), "BT- %d%%", state->battery);
-        }
-    } else {
-        snprintf(display_text, sizeof(display_text), "--- %d%%", state->battery);
-    }
-    
-    lv_canvas_draw_text(canvas, 5, 5, 60, &label_dsc, display_text);
-}
-
-static void draw_layer_squares(lv_obj_t *canvas, const struct status_state *state) {
-    lv_draw_rect_dsc_t rect_dsc;
-    init_rect_dsc(&rect_dsc, LVGL_FOREGROUND);
-    
-    // Draw layer indicator squares
-    for (int i = 0; i < 4; i++) {
-        int x = 5 + (i * 12);
-        int y = 25;
-        
-        if (i == state->layer_index) {
-            // Fill active layer square
-            lv_canvas_draw_rect(canvas, x, y, 8, 8, &rect_dsc);
-        } else {
-            // Draw outline for inactive layers
-            lv_canvas_draw_rect(canvas, x, y, 8, 1, &rect_dsc);     // top
-            lv_canvas_draw_rect(canvas, x, y+7, 8, 1, &rect_dsc);   // bottom
-            lv_canvas_draw_rect(canvas, x, y, 1, 8, &rect_dsc);     // left
-            lv_canvas_draw_rect(canvas, x+7, y, 1, 8, &rect_dsc);   // right
-        }
-    }
-}
-
-static void draw_layer_letters(lv_obj_t *canvas, const struct status_state *state) {
-    lv_draw_label_dsc_t label_dsc;
-    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
-    
-    char layer_text[10] = {};
-    if (state->layer_label) {
-        snprintf(layer_text, sizeof(layer_text), "%s", state->layer_label);
-    } else {
-        snprintf(layer_text, sizeof(layer_text), "L%d", state->layer_index);
-    }
-    
-    lv_canvas_draw_text(canvas, 5, 40, 60, &label_dsc, layer_text);
-}
-
-/**
  * Draw canvas
  **/
 
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
-    // Draw widgets based on split role
+    // Draw widgets
     draw_background(canvas);
-    
-#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    // Central/Main keyboard (right side): Simple layout
-    draw_simple_status(canvas, state);
-    draw_layer_squares(canvas, state);
-    draw_layer_letters(canvas, state);
-#else    // Peripheral keyboard (left side): All meters  
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
-    draw_wpm_status(canvas, state);
     draw_profile_status(canvas, state);
     draw_layer_status(canvas, state);
-#endif
 
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
