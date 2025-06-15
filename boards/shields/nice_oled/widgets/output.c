@@ -47,9 +47,13 @@ void draw_output_status(lv_obj_t *canvas, const struct status_state *state, int 
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
 
     char text[16] = {};
-    int result = snprintf(text, sizeof(text), "Output: %s", state->output_label ? state->output_label : "N/A");
-    if (result >= sizeof(text)) {
-        LV_LOG_WARN("truncated");
+    // Use available info: show USB or BLE and profile index if available
+    if (state->selected_endpoint.transport == 1) { // 1 = USB
+        snprintf(text, sizeof(text), "Output: USB");
+    } else if (state->selected_endpoint.transport == 2) { // 2 = BLE
+        snprintf(text, sizeof(text), "Output: BLE %d", state->active_profile_index + 1);
+    } else {
+        snprintf(text, sizeof(text), "Output: N/A");
     }
 
     // Draw at y_offset instead of fixed y
