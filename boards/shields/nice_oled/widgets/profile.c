@@ -39,16 +39,10 @@ void draw_profile_status(lv_obj_t *canvas, const struct status_state *state, int
     lv_draw_label_dsc_t label_dsc;
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
 
-    char text[16] = {};
-    // Use the profile index for display, since status_state has no profile_label
-    int result = snprintf(text, sizeof(text), "Profile: %d", state->active_profile_index + 1);
-    if (result >= sizeof(text)) {
-        LV_LOG_WARN("truncated");
-    }
-
+    char text[8] = {};
+    snprintf(text, sizeof(text), "%d", state->active_profile_index + 1);
     // Draw at y_offset instead of fixed y
-    lv_canvas_draw_text(canvas, 0, y_offset, 68, &label_dsc, text);
-    draw_active_profile_text(canvas, state, y_offset + 10);
+    lv_canvas_draw_text(canvas, 25, y_offset, 35, &label_dsc, text);
     draw_inactive_profiles(canvas, state);
     draw_active_profile(canvas, state);
 }

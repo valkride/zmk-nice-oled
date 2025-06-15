@@ -47,13 +47,13 @@ void draw_output_status(lv_obj_t *canvas, const struct status_state *state, int 
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
 
     char text[16] = {};
-    // Use available info: show USB or BLE and profile index if available
+    // ZMK-style: show USB, BLE N, or N/A, no prefix, always fits
     if (state->selected_endpoint.transport == 1) { // 1 = USB
-        snprintf(text, sizeof(text), "Output: USB");
+        strcpy(text, "USB");
     } else if (state->selected_endpoint.transport == 2) { // 2 = BLE
-        snprintf(text, sizeof(text), "Output: BLE %d", state->active_profile_index + 1);
+        snprintf(text, sizeof(text), "BLE %d", state->active_profile_index + 1);
     } else {
-        snprintf(text, sizeof(text), "Output: N/A");
+        strcpy(text, "N/A");
     }
 
     // Draw at y_offset instead of fixed y

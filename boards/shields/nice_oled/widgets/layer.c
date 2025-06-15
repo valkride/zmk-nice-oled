@@ -13,7 +13,7 @@ void draw_layer_status(lv_obj_t *canvas, const struct status_state *state, int y
   int result = 0;
 
   if (state->layer_label == NULL) {
-    result = snprintf(text, sizeof(text), "Layer %i", state->layer_index);
+    result = snprintf(text, sizeof(text), "LAYER %i", state->layer_index);
   } else {
     result = snprintf(text, sizeof(text), "%s", state->layer_label);
     for (int i = 0; text[i] != '\0'; i++) {
