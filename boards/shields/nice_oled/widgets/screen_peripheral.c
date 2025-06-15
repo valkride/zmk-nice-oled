@@ -94,8 +94,8 @@ static struct layer_status_state layer_status_get_state(const zmk_event_t *eh) {
     return (struct layer_status_state){.index = (ev != NULL) ? ev->layer : 0, .label = NULL};
 };
 
-ZMK_DISPLAY_WIDGET_LISTENER(widget_layer_status, struct layer_status_state, layer_status_update_cb, layer_status_get_state)
-ZMK_SUBSCRIPTION(widget_layer_status, zmk_layer_state_changed);
+ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_layer_status, struct layer_status_state, layer_status_update_cb, layer_status_get_state)
+ZMK_SUBSCRIPTION(widget_peripheral_layer_status, zmk_layer_state_changed);
 
 /**
  * Profile status
@@ -130,10 +130,8 @@ int zmk_widget_screen_peripheral_init(struct zmk_widget_screen_peripheral *widge
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
     lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
     
-    sys_slist_append(&widgets, &widget->node);
-
-    widget_wpm_status_init();
-    widget_layer_status_init();
+    sys_slist_append(&widgets, &widget->node);    widget_wpm_status_init();
+    widget_peripheral_layer_status_init();
     widget_profile_status_init();
 
     return 0;
