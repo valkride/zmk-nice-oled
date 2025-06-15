@@ -47,7 +47,7 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
     lv_canvas_fill_bg(canvas, LVGL_BACKGROUND, LV_OPA_COVER);
-    // Peripheral OLED: show meters only, stacked vertically
+    // Peripheral OLED: show all meters, stacked, ZMK style
     draw_wpm_status(canvas, state, 0);      // Top
     draw_layer_status(canvas, state, 40);   // Below WPM
     draw_profile_status(canvas, state, 80); // Below Layer

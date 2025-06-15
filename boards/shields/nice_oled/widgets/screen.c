@@ -27,7 +27,6 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     lv_canvas_fill_bg(canvas, LVGL_BACKGROUND, LV_OPA_COVER);
     // Main OLED: show only battery and connection status, no meters, no art/animation
     draw_battery_status(canvas, state);
-    // Optionally: draw_output_status(canvas, state, 50); // Only if you want output on main
     rotate_canvas(canvas, cbuf);
 }
 
