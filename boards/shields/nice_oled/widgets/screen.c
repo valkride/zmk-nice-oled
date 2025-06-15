@@ -29,33 +29,28 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
  **/
 static void draw_activity_bar(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_label_dsc_t label_dsc;
-    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
-    
-    // Draw bluetooth/USB icon on the left
-    char icon_text[8] = {};
+    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);    // Create single line with bluetooth symbol and battery percentage
+    char display_text[20] = {};
     #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     // Only show connection status on central/main keyboard
     if (state->selected_endpoint.transport == 1) { // USB
-        strcpy(icon_text, "USB");
+        sprintf(display_text, "\xEF\x87\xAB " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery); // USB icon + battery
     } else if (state->selected_endpoint.transport == 2) { // BLE
         if (state->active_profile_connected) {
-            strcpy(icon_text, "BLE");
+            sprintf(display_text, "\xEF\x8A\x94 " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery); // Bluetooth icon + battery
         } else {
-            strcpy(icon_text, "---");
+            sprintf(display_text, "\xEF\x87\xB6 " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery); // Disconnected icon + battery
         }
     } else {
-        strcpy(icon_text, "N/A");
+        sprintf(display_text, "? " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery);
     }
     #else
-    // For peripheral, just show "PER"
-    strcpy(icon_text, "PER");
+    // For peripheral, show PER
+    sprintf(display_text, "P " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery);
     #endif
-    lv_canvas_draw_text(canvas, 0, 0, 30, &label_dsc, icon_text);
     
-    // Draw battery percentage on the right
-    char battery_text[8] = {};
-    sprintf(battery_text, "%d%%", state->battery);
-    lv_canvas_draw_text(canvas, 35, 0, 30, &label_dsc, battery_text);
+    // Draw the complete status line at top-left
+    lv_canvas_draw_text(canvas, 0, 0, 128, &label_dsc, display_text);
 }
 
 /**
