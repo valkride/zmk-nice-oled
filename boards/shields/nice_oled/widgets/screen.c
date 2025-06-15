@@ -24,7 +24,7 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
  **/
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
-    // Only draw the gem/crystal art (background) on the main OLED
+    // Only show the art/animation on the main OLED
     draw_background(canvas);
     rotate_canvas(canvas, cbuf);
 }
