@@ -25,6 +25,18 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "screen.h"
 #include "../assets/custom_fonts.h"
 
+// Fallback macros for event helpers
+#ifndef as_zmk_layer_state_changed
+#define as_zmk_layer_state_changed(eh) ((const struct zmk_layer_state_changed *)((eh) ? (eh) : NULL))
+#endif
+#ifndef zmk_event_zmk_layer_state_changed
+#define zmk_event_zmk_layer_state_changed (*(const struct zmk_event_type *)0)
+#endif
+// If ZMK_SUBSCRIPTION is not defined, stub it as a no-op
+#ifndef ZMK_SUBSCRIPTION
+#define ZMK_SUBSCRIPTION(...)
+#endif
+
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
 /**
@@ -189,9 +201,10 @@ static void layer_status_update_cb(struct layer_status_state state) {
 }
 
 static struct layer_status_state layer_status_get_state(const zmk_event_t *eh) {
-    // Simplified - just return layer 0 for now
+    // Use the same pattern as screen_peripheral.c
+    const struct zmk_layer_state_changed *ev = as_zmk_layer_state_changed(eh);
     return (struct layer_status_state){
-        .index = 0, 
+        .index = (ev != NULL) ? ev->layer : 0, 
         .label = "Base"
     };
 }

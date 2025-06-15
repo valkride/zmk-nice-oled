@@ -12,7 +12,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "layer.h"
 #include "profile.h"
 #include "screen_peripheral.h"
-#include "../assets/custom_fonts.h" // Add this line to declare pixel_operator_mono_16
+#include "../assets/custom_fonts.h"
 
 // Fallback macros for event helpers only
 #ifndef as_zmk_wpm_state_changed
@@ -127,10 +127,11 @@ int zmk_widget_screen_peripheral_init(struct zmk_widget_screen_peripheral *widge
     lv_obj_set_size(widget->obj, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     lv_obj_t *canvas = lv_canvas_create(widget->obj);
-    lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
+    lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
     
-    sys_slist_append(&widgets, &widget->node);    widget_wpm_status_init();
+    sys_slist_append(&widgets, &widget->node);
+
+    widget_wpm_status_init();
     widget_peripheral_layer_status_init();
     widget_profile_status_init();
 
