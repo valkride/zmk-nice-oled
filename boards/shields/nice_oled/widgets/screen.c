@@ -52,9 +52,8 @@ static void draw_activity_bar(lv_obj_t *canvas, const struct status_state *state
     // For peripheral, show PER
     sprintf(display_text, "P " LV_SYMBOL_BATTERY_FULL "%d%%", state->battery);
     #endif
-    
-    // Draw the complete status line at top-left
-    lv_canvas_draw_text(canvas, 0, 0, 128, &label_dsc, display_text);
+      // Draw the complete status line at top-left
+    lv_canvas_draw_text(canvas, 0, 0, CANVAS_WIDTH, &label_dsc, display_text);
 }
 
 /**
@@ -91,9 +90,8 @@ static void draw_layer_squares(lv_obj_t *canvas, const struct status_state *stat
 static void draw_layer_letters(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_label_dsc_t label_dsc;
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
-    
-    // Draw "AAAAAA" as filler text below the squares
-    lv_canvas_draw_text(canvas, 0, 28, 128, &label_dsc, "AAAAAA");
+      // Draw "AAAAAA" as filler text below the squares
+    lv_canvas_draw_text(canvas, 0, 28, CANVAS_WIDTH, &label_dsc, "AAAAAA");
 }
 
 /**
@@ -227,13 +225,17 @@ ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
  **/
 int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
-    lv_obj_set_size(widget->obj, CANVAS_HEIGHT, CANVAS_WIDTH);
+    lv_obj_set_size(widget->obj, CANVAS_WIDTH, CANVAS_HEIGHT);
     lv_obj_t *canvas = lv_canvas_create(widget->obj);
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
+    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
+    
+    sys_slist_append(&widgets, &widget->node);
 #if defined(draw_animation)
     draw_animation(canvas, widget);
-#endif    widget_battery_status_init();
+#endif
+    
+    widget_battery_status_init();
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     widget_main_output_status_init();
 #endif
