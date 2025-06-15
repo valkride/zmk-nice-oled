@@ -59,5 +59,4 @@ target_sources(app PRIVATE
   # widgets/screen_peripheral.c
   # widgets/util.c
   # widgets/wpm.c
-  # widgets/split_sync.c
 )
