@@ -24,22 +24,11 @@ static void draw_active_profile(lv_obj_t *canvas,
   lv_canvas_draw_rect(canvas, 0 + offset, y_offset + 10, 3, 3, &rect_white_dsc);
 }
 
-static void draw_active_profile_text(lv_obj_t *canvas,
-                                     const struct status_state *state, int y_offset) {
-  lv_draw_label_dsc_t label_dsc;
-  init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_8,
-                 LV_TEXT_ALIGN_LEFT);
-  char text[14] = {};
-  snprintf(text, sizeof(text), "%d", state->active_profile_index + 1);
-  // Move profile text to y=120
-  lv_canvas_draw_text(canvas, 25, y_offset, 35, &label_dsc, text);
-}
-
 void draw_profile_status(lv_obj_t *canvas, const struct status_state *state, int y_offset) {
     lv_draw_label_dsc_t label_dsc;
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
 
-    char text[8] = {};
+    char text[16] = {};  // Increased buffer size to fix truncation warning
     snprintf(text, sizeof(text), "%d", state->active_profile_index + 1);
     // Draw at y_offset instead of fixed y
     lv_canvas_draw_text(canvas, 25, y_offset, 35, &label_dsc, text);
