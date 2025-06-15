@@ -33,6 +33,8 @@ static void draw_activity_bar(lv_obj_t *canvas, const struct status_state *state
     
     // Draw bluetooth/USB icon on the left
     char icon_text[8] = {};
+    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+    // Only show connection status on central/main keyboard
     if (state->selected_endpoint.transport == 1) { // USB
         strcpy(icon_text, "USB");
     } else if (state->selected_endpoint.transport == 2) { // BLE
@@ -44,6 +46,10 @@ static void draw_activity_bar(lv_obj_t *canvas, const struct status_state *state
     } else {
         strcpy(icon_text, "N/A");
     }
+    #else
+    // For peripheral, just show "PER"
+    strcpy(icon_text, "PER");
+    #endif
     lv_canvas_draw_text(canvas, 0, 0, 30, &label_dsc, icon_text);
     
     // Draw battery percentage on the right
@@ -93,8 +99,9 @@ ZMK_SUBSCRIPTION(widget_battery_status, zmk_usb_conn_state_changed);
 #endif
 
 /**
- * Output status (for bluetooth/USB icon)
+ * Output status (for bluetooth/USB icon) - Only on central/main
  **/
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 static void set_output_status(struct zmk_widget_screen *widget, struct output_status_state state) {
     widget->state.selected_endpoint = state.selected_endpoint;
     widget->state.active_profile_index = state.active_profile_index;
@@ -125,6 +132,7 @@ ZMK_SUBSCRIPTION(widget_main_output_status, zmk_usb_conn_state_changed);
 #if defined(CONFIG_ZMK_BLE)
 ZMK_SUBSCRIPTION(widget_main_output_status, zmk_ble_active_profile_changed);
 #endif
+#endif // Output status only on central/main
 
 /**
  * Peripheral status
@@ -162,7 +170,9 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     draw_animation(canvas, widget);
 #endif
     widget_battery_status_init();
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     widget_main_output_status_init();
+#endif
     widget_peripheral_status_init();
     return 0;
 }
