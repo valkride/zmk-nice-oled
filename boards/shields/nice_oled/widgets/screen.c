@@ -11,10 +11,12 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/events/endpoint_changed.h>
 #include <zmk/events/ble_active_profile_changed.h>
+#include <zmk/events/layer_state_changed.h>
 #include <zmk/split/bluetooth/peripheral.h>
 #include <zmk/usb.h>
 #include <zmk/ble.h>
 #include <zmk/endpoints.h>
+#include <zmk/keymap.h>
 
 #include "animation.h"
 #include "battery.h"
@@ -29,7 +31,9 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
  **/
 static void draw_activity_bar(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_label_dsc_t label_dsc;
-    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);    // Create single line with bluetooth symbol and battery percentage
+    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
+    
+    // Create single line with bluetooth symbol and battery percentage
     char display_text[20] = {};
     #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     // Only show connection status on central/main keyboard
@@ -54,13 +58,54 @@ static void draw_activity_bar(lv_obj_t *canvas, const struct status_state *state
 }
 
 /**
+ * Draw layer squares (row of squares indicating layers)
+ **/
+static void draw_layer_squares(lv_obj_t *canvas, const struct status_state *state) {
+    lv_draw_rect_dsc_t rect_outline_dsc;
+    init_rect_dsc(&rect_outline_dsc, LVGL_FOREGROUND);
+    lv_draw_rect_dsc_t rect_filled_dsc;
+    init_rect_dsc(&rect_filled_dsc, LVGL_FOREGROUND);
+    lv_draw_rect_dsc_t rect_empty_dsc;
+    init_rect_dsc(&rect_empty_dsc, LVGL_BACKGROUND);
+    
+    // Draw 6 layer squares
+    for (int i = 0; i < 6; i++) {
+        int x = i * 10; // 10 pixels apart
+        int y = 15;     // Below the activity bar
+        
+        // Draw outline for all squares
+        lv_canvas_draw_rect(canvas, x, y, 8, 8, &rect_outline_dsc);
+        
+        // Fill the active layer square
+        if (i == state->layer_index) {
+            lv_canvas_draw_rect(canvas, x + 1, y + 1, 6, 6, &rect_filled_dsc);
+        } else {
+            lv_canvas_draw_rect(canvas, x + 1, y + 1, 6, 6, &rect_empty_dsc);
+        }
+    }
+}
+
+/**
+ * Draw layer letters (AAAAAA as filler)
+ **/
+static void draw_layer_letters(lv_obj_t *canvas, const struct status_state *state) {
+    lv_draw_label_dsc_t label_dsc;
+    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono, LV_TEXT_ALIGN_LEFT);
+    
+    // Draw "AAAAAA" as filler text below the squares
+    lv_canvas_draw_text(canvas, 0, 28, 128, &label_dsc, "AAAAAA");
+}
+
+/**
  * Draw canvas
  **/
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
     lv_canvas_fill_bg(canvas, LVGL_BACKGROUND, LV_OPA_COVER);
-    // Main OLED: show only activity bar with bluetooth icon and battery percentage
+    // Main OLED: show activity bar, layer squares, and layer letters
     draw_activity_bar(canvas, state);
+    draw_layer_squares(canvas, state);
+    draw_layer_letters(canvas, state);
     rotate_canvas(canvas, cbuf);
 }
 
@@ -130,6 +175,31 @@ ZMK_SUBSCRIPTION(widget_main_output_status, zmk_ble_active_profile_changed);
 #endif // Output status only on central/main
 
 /**
+ * Layer status
+ **/
+static void set_layer_status(struct zmk_widget_screen *widget, struct layer_status_state state) {
+    widget->state.layer_index = state.index;
+    widget->state.layer_label = state.label;
+    draw_canvas(widget->obj, widget->cbuf, &widget->state);
+}
+
+static void layer_status_update_cb(struct layer_status_state state) {
+    struct zmk_widget_screen *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_layer_status(widget, state); }
+}
+
+static struct layer_status_state layer_status_get_state(const zmk_event_t *eh) {
+    zmk_keymap_layer_index_t index = zmk_keymap_highest_layer_active();
+    return (struct layer_status_state){
+        .index = index, 
+        .label = zmk_keymap_layer_name(zmk_keymap_layer_index_to_id(index))
+    };
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_layer_status, struct layer_status_state, layer_status_update_cb, layer_status_get_state)
+ZMK_SUBSCRIPTION(widget_layer_status, zmk_layer_state_changed);
+
+/**
  * Peripheral status
  **/
 static struct peripheral_status_state get_state(const zmk_event_t *_eh) {
@@ -163,11 +233,11 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
 #if defined(draw_animation)
     draw_animation(canvas, widget);
-#endif
-    widget_battery_status_init();
+#endif    widget_battery_status_init();
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     widget_main_output_status_init();
 #endif
+    widget_layer_status_init();
     widget_peripheral_status_init();
     return 0;
 }
