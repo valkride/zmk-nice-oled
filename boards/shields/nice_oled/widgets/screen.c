@@ -24,14 +24,11 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "output.h"
 #include "profile.h"
 #include "screen.h"
-// Note: "wpm.h" removed - WPM now handled by peripheral
-#include "display_split_sync.h"
+// Note: "wpm.h" and "display_split_sync.h" removed - WPM now handled independently by peripheral
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
-#if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-static void sync_data_to_peripheral(const struct status_state *state);
-#endif
+// Note: sync_data_to_peripheral function removed - WPM now handled independently by peripheral
 
 /**
  * luna
@@ -64,48 +61,17 @@ static struct zmk_widget_hid_indicators hid_indicators_widget;
  **/
 
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
-    lv_obj_t *canvas = lv_obj_get_child(widget, 0);
-
-    // Central/Main (right) display: Show Bluetooth, battery, and layer only (no WPM or other meters)
+    lv_obj_t *canvas = lv_obj_get_child(widget, 0);    // Central/Main (right) display: Show Bluetooth, battery, and layer only (no WPM or other meters)
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
     draw_layer_status(canvas, state);
 
-    // Send data to peripheral for WPM display
-    #if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    sync_data_to_peripheral(state);
-    #endif
+    // Note: Data sync to peripheral removed - peripheral now handles WPM independently
 
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
 }
-
-#if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-static void sync_data_to_peripheral(const struct status_state *state) {
-    struct display_sync_data sync_data = {0};
-    
-    // Note: WPM data sync removed - WPM now handled directly by peripheral
-    
-    // Copy layer data
-    sync_data.layer_index = state->layer_index;
-    if (state->layer_label) {
-        strncpy(sync_data.layer_label, state->layer_label, sizeof(sync_data.layer_label) - 1);
-        sync_data.layer_label[sizeof(sync_data.layer_label) - 1] = '\0';
-    }
-    
-    // Copy profile data
-    sync_data.active_profile_index = state->active_profile_index;
-    sync_data.active_profile_connected = state->active_profile_connected;
-    sync_data.active_profile_bonded = state->active_profile_bonded;
-    
-    // Copy endpoint data
-    sync_data.selected_endpoint = state->selected_endpoint;
-    
-    // Send to peripheral
-    display_split_sync_send_data(&sync_data);
-}
-#endif
 
 /**
  * Battery status
@@ -231,12 +197,8 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     widget_battery_status_init();
     widget_layer_status_init();
     widget_output_status_init();
-    // Note: widget_wmp_status_init() removed - WPM now handled by peripheral display
-
-    // Initialize split sync system
-    #if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    display_split_sync_init();
-    #endif
+    // Note: widget_wpm_status_init() removed - WPM now handled by peripheral display
+    // Note: display_split_sync_init() removed - sync functionality no longer needed
 
 #if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_WPM)
     zmk_widget_luna_init(&luna_widget, canvas);
