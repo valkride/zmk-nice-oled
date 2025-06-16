@@ -5,7 +5,7 @@
 #include <zmk/wpm.h>
 
 LV_IMG_DECLARE(gauge);
-LV_IMG_DECLAR    } else {
+LV_IMG_DECLARE(needle);
         lv_canvas_draw_text(canvas, 7, 75, 50, &label_dsc_wpm, wpm_text);
         // lv_canvas_draw_text(canvas, 5, 75, 50, &label_dsc_wpm, wmp_text); // with
         // global font
