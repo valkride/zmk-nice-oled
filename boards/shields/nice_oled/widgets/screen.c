@@ -17,6 +17,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/keymap.h>
 #include <zmk/usb.h>
 #include <zmk/wpm.h>
+#include <string.h>
 
 #include "battery.h"
 #include "layer.h"
@@ -24,8 +25,13 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "profile.h"
 #include "screen.h"
 #include "wpm.h"
+#include "display_split_sync.h"
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
+
+#if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+static void sync_data_to_peripheral(const struct status_state *state);
+#endif
 
 /**
  * luna
@@ -68,9 +74,41 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     // Show layer info as simple indicators
     draw_layer_status(canvas, state);
 
+    // Send data to peripheral for full meters display
+    #if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+    sync_data_to_peripheral(state);
+    #endif
+
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
 }
+
+#if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+static void sync_data_to_peripheral(const struct status_state *state) {
+    struct display_sync_data sync_data = {0};
+    
+    // Copy WPM data
+    memcpy(sync_data.wpm, state->wpm, sizeof(sync_data.wpm));
+    
+    // Copy layer data
+    sync_data.layer_index = state->layer_index;
+    if (state->layer_label) {
+        strncpy(sync_data.layer_label, state->layer_label, sizeof(sync_data.layer_label) - 1);
+        sync_data.layer_label[sizeof(sync_data.layer_label) - 1] = '\0';
+    }
+    
+    // Copy profile data
+    sync_data.active_profile_index = state->active_profile_index;
+    sync_data.active_profile_connected = state->active_profile_connected;
+    sync_data.active_profile_bonded = state->active_profile_bonded;
+    
+    // Copy endpoint data
+    sync_data.selected_endpoint = state->selected_endpoint;
+    
+    // Send to peripheral
+    display_split_sync_send_data(&sync_data);
+}
+#endif
 
 /**
  * Battery status
@@ -219,6 +257,11 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     widget_layer_status_init();
     widget_output_status_init();
     widget_wpm_status_init();
+
+    // Initialize split sync system
+    #if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+    display_split_sync_init();
+    #endif
 
 #if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_WPM)
     zmk_widget_luna_init(&luna_widget, canvas);

@@ -27,13 +27,13 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
     target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_MODIFIERS_INDICATORS app PRIVATE widgets/modifiers.c)
     zephyr_library_sources(assets/luna_images.c)
     target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_MASTER_TEST app PRIVATE widgets/luna_dev.c)
-    target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_WPM app PRIVATE widgets/luna.c)
-
-    zephyr_library_sources(widgets/layer.c)
+    target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_WPM app PRIVATE widgets/luna.c)    zephyr_library_sources(widgets/layer.c)
     zephyr_library_sources(widgets/profile.c)
     zephyr_library_sources(widgets/screen.c)
     zephyr_library_sources(widgets/wpm.c)
-  else()
+    
+    # Split sync system for central
+    zephyr_library_sources(widgets/display_split_sync.c)else()
 
     if(CONFIG_NICE_OLED_WIDGET_PERIPHERAL_TEST)
       zephyr_library_sources(assets/crystal.c)
@@ -46,6 +46,13 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
     zephyr_library_sources(assets/pokemon.c)
     zephyr_library_sources(widgets/animation.c)
     zephyr_library_sources(widgets/screen_peripheral.c)
+    
+    # Split sync system for peripheral
+    zephyr_library_sources(widgets/display_split_sync.c)
+    zephyr_library_sources(widgets/peripheral_extended_state.c)
+    zephyr_library_sources(widgets/wpm.c)
+    zephyr_library_sources(widgets/layer.c)
+    zephyr_library_sources(widgets/profile.c)
   endif()
 endif()
 endif() # SHIELD_NICE_EPAPER

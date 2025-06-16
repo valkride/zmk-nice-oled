@@ -17,8 +17,20 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "battery.h"
 #include "output.h"
 #include "screen_peripheral.h"
+#include "wpm.h"
+#include "layer.h" 
+#include "profile.h"
+#include "display_split_sync.h"
+#include "peripheral_extended_state.h"
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
+
+// Extended state that can hold synced data
+static struct peripheral_extended_status_state extended_state = {0};
+
+// Forward declarations
+static void on_sync_data_received(const struct display_sync_data *data);
+static void update_display(void);
 
 /**
  * Draw canvas
@@ -27,28 +39,62 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
-    // Peripheral display: Try to show a meters-style layout
-    // Since we can't access real WPM/layer data, we'll simulate it for visual testing
-    
-    // Create a mock state with sample data for display testing
-    struct status_state mock_state = *state; // Copy the real state
-    
-    // NO background - should look different from central
-    
-    // Draw connection/output status at top
-    draw_output_status(canvas, state);
-    
-    // Try to draw battery in a different position (lower)
-    draw_battery_status(canvas, state);
-    
-    // Add text to clearly identify this as peripheral 
-    lv_draw_label_dsc_t label_dsc;
-    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &lv_font_montserrat_12, LV_TEXT_ALIGN_CENTER);
-    lv_area_t text_area = {.x1 = 0, .y1 = 45, .x2 = 64, .y2 = 60};
-    lv_draw_label(canvas, &text_area, &label_dsc, "PERI", NULL);
+    // Peripheral display: Show FULL meters layout using synced data
+    if (extended_state.sync_active) {
+        // We have synced data - show full meters like original central display!
+        
+        // No background - clean meters-only layout
+        draw_output_status(canvas, state);
+        draw_wpm_status(canvas, state);
+        draw_battery_status(canvas, state); 
+        draw_profile_status(canvas, state);
+        draw_layer_status(canvas, state);
+        
+    } else {
+        // Fallback: basic peripheral display if no sync
+        draw_background(canvas);
+        draw_output_status(canvas, state);
+        draw_battery_status(canvas, state);
+        
+        // Show "NO SYNC" indicator
+        lv_draw_label_dsc_t label_dsc;
+        init_label_dsc(&label_dsc, LVGL_FOREGROUND, &lv_font_montserrat_10, LV_TEXT_ALIGN_CENTER);
+        lv_area_t text_area = {.x1 = 0, .y1 = 50, .x2 = 64, .y2 = 64};
+        lv_draw_label(canvas, &text_area, &label_dsc, "NO SYNC", NULL);
+    }
 
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
+}
+
+/**
+ * Split sync callback - called when data is received from central
+ **/
+static void on_sync_data_received(const struct display_sync_data *data) {
+    if (!data) {
+        return;
+    }
+    
+    // Update extended state with synced data
+    update_extended_state_with_sync(&extended_state, data);
+    
+    // Trigger display update
+    update_display();
+}
+
+/**
+ * Update display with current extended state
+ **/
+static void update_display(void) {
+    struct status_state *state = extended_to_status_state(&extended_state);
+    if (!state) {
+        return;
+    }
+    
+    struct zmk_widget_screen *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
+        draw_canvas(widget->obj, widget->cbuf, state);
+    }
 }
 
 /**
@@ -59,12 +105,12 @@ static void set_battery_status(struct zmk_widget_screen *widget,
                                struct battery_status_state state) {
 
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
-    widget->state.charging = state.usb_present;
+    extended_state.charging = state.usb_present;
 #endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
 
-    widget->state.battery = state.level;
+    extended_state.battery = state.level;
 
-    draw_canvas(widget->obj, widget->cbuf, &widget->state);
+    update_display();
 }
 
 static void battery_status_update_cb(struct battery_status_state state) {
@@ -101,9 +147,9 @@ static struct peripheral_status_state get_state(const zmk_event_t *_eh) {
 
 static void set_connection_status(struct zmk_widget_screen *widget,
                                   struct peripheral_status_state state) {
-    widget->state.connected = state.connected;
+    extended_state.connected = state.connected;
 
-    draw_canvas(widget->obj, widget->cbuf, &widget->state);
+    update_display();
 }
 
 static void output_status_update_cb(struct peripheral_status_state state) {
@@ -125,10 +171,20 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
 
     lv_obj_t *canvas = lv_canvas_create(widget->obj);
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
+    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
+
+    sys_slist_append(&widgets, &widget->node);
     draw_animation(canvas, widget);
+    
+    // Initialize local status tracking
     widget_battery_status_init();
     widget_peripheral_status_init();
+
+    // Initialize split sync system and register callback
+    #if IS_ENABLED(CONFIG_ZMK_SPLIT) && !IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+    display_split_sync_init();
+    display_split_sync_register_callback(on_sync_data_received);
+    #endif
 
     return 0;
 }
