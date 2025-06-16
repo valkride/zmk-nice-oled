@@ -27,13 +27,13 @@ static void update_display(void);
  **/
 
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
-    lv_obj_t *canvas = lv_obj_get_child(widget, 0);
-
-    // Peripheral (left) display: Show Bluetooth, battery, and WPM meter like it would appear on main screen
+    lv_obj_t *canvas = lv_obj_get_child(widget, 0);    // Peripheral (left) display: Show Bluetooth, battery, and WPM meter like it would appear on main screen
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
-    draw_wpm_status(canvas, state);    // Rotate for horizontal display
+    draw_wpm_status(canvas, state);
+    
+    // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
 }
 
@@ -121,11 +121,11 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
 
     lv_obj_t *canvas = lv_canvas_create(widget->obj);
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
-
-    sys_slist_append(&widgets, &widget->node);
-    draw_animation(canvas, widget);
-      // Initialize local status tracking
+    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
+    // Boot animation removed for peripheral display to show WPM clearly
+    // draw_animation(canvas, widget);
+    
+    // Initialize local status tracking
     widget_battery_status_init();
     widget_peripheral_status_init();
 
