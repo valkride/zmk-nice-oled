@@ -6,17 +6,12 @@
 
 LV_IMG_DECLARE(gauge);
 LV_IMG_DECLARE(needle);
-        lv_canvas_draw_text(canvas, 7, 75, 50, &label_dsc_wpm, wpm_text);
-        // lv_canvas_draw_text(canvas, 5, 75, 50, &label_dsc_wpm, wmp_text); // with
-        // global font
-    }
+
+#if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_WPM_LUNA)
 #else
-    // For peripheral builds, try to get current WPM state
-    // WPM counting happens on central, but peripheral can display last known state
-    int current_wpm = zmk_wpm_get_state();
-    snprintf(wpm_text, sizeof(wpm_text), "%d", current_wpm);
-    lv_canvas_draw_text(canvas, 12, 75, 50, &label_dsc_wpm, wpm_text);
+LV_IMG_DECLARE(grid);
 #endif
+
 static void draw_gauge(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_img_dsc_t img_dsc;
     lv_draw_img_dsc_init(&img_dsc);
@@ -130,9 +125,10 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
         }
         if (state->wpm[i] < min) {
             min = state->wpm[i];
-        }
-    }
-    #endif    int range = max - min;
+        }    }
+    #endif
+    
+    int range = max - min;
     if (range == 0) {
         range = 1;
     }
@@ -154,7 +150,8 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
 }
 #endif
 
-static void draw_label(lv_obj_t *canvas, const struct status_state *state) {    lv_draw_label_dsc_t label_dsc_wpm;
+static void draw_label(lv_obj_t *canvas, const struct status_state *state) {
+    lv_draw_label_dsc_t label_dsc_wpm;
     init_label_dsc(&label_dsc_wpm, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_LEFT);
     // init_label_dsc(&label_dsc_wpm, LVGL_FOREGROUND, &pixel_operator_mono,
     // LV_TEXT_ALIGN_LEFT);
@@ -170,12 +167,12 @@ static void draw_label(lv_obj_t *canvas, const struct status_state *state) {    
     } else if (state->wpm[9] >= 10 && state->wpm[9] < 100) {
         lv_canvas_draw_text(canvas, 9, 75, 50, &label_dsc_wpm, wpm_text);
         // lv_canvas_draw_text(canvas, 8, 75, 50, &label_dsc_wpm, wpm_text); // with
-        // global font
-    } else {
+        // global font    } else {
         lv_canvas_draw_text(canvas, 7, 75, 50, &label_dsc_wpm, wpm_text);
-        // lv_canvas_draw_text(canvas, 5, 75, 50, &label_dsc_wpm, wpm_text); // with
+        // lv_canvas_draw_text(canvas, 5, 75, 50, &label_dsc_wmp, wmp_text); // with
         // global font
-    }    #else
+    }
+#else
     // For peripheral builds, try to get current WPM state
     // WPM counting happens on central, but peripheral can display last known state
     int current_wpm = zmk_wpm_get_state();
