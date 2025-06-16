@@ -5,7 +5,12 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #include <zmk/battery.h>
 #include <zmk/ble.h>
-#include <zmk/display.h>
+#i      // Initialize local status tracking
+    widget_battery_status_init();
+    widget_peripheral_status_init();
+#if IS_ENABLED(CONFIG_ZMK_WPM)
+    widget_wpm_status_init();
+#endifde <zmk/display.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
@@ -37,7 +42,9 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
+#if IS_ENABLED(CONFIG_ZMK_WPM)
     draw_wpm_status(canvas, state);
+#endif
     
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
@@ -121,12 +128,14 @@ ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
  * WPM status
  **/
 
+#if IS_ENABLED(CONFIG_ZMK_WPM)
 static void set_wpm_status(struct zmk_widget_screen *widget, struct wpm_status_state state) {
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     for (int i = 0; i < 9; i++) {
         widget->state.wpm[i] = widget->state.wpm[i + 1];
     }
     widget->state.wpm[9] = state.wpm;
-
+#endif
     update_display();
 }
 
@@ -142,6 +151,7 @@ struct wpm_status_state wpm_status_get_state(const zmk_event_t *eh) {
 ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status, struct wpm_status_state, wpm_status_update_cb,
                             wpm_status_get_state)
 ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
+#endif /* IS_ENABLED(CONFIG_ZMK_WPM) */
 
 /**
  * Initialization
