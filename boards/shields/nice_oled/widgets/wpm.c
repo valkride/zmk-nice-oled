@@ -119,10 +119,10 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
     int min = 256;
 
     #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    for (int i = 0; i < 10; i++) {
-        if (state->wpm[i] > max) {
+    for (int i = 0; i < 10; i++) {        if (state->wpm[i] > max) {
             max = state->wpm[i];
-        }        if (state->wpm[i] < min) {
+        }
+        if (state->wpm[i] < min) {
             min = state->wpm[i];
         }
     }
@@ -159,11 +159,11 @@ static void draw_label(lv_obj_t *canvas, const struct status_state *state) {
 
     #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     snprintf(wpm_text, sizeof(wpm_text), "%d", state->wpm[9]);
-    // if wpm < 10, elsse if wpm => 10 and wpm < 100, else wpm >= 100
-    if (state->wpm[9] < 10) {
+    // if wpm < 10, elsse if wpm => 10 and wpm < 100, else wpm >= 100    if (state->wpm[9] < 10) {
         lv_canvas_draw_text(canvas, 12, 75, 50, &label_dsc_wpm, wpm_text);
         // lv_canvas_draw_text(canvas, 12, 75, 50, &label_dsc_wpm, wpm_text); //
-        // with global font    } else if (state->wpm[9] >= 10 && state->wpm[9] < 100) {
+        // with global font
+    } else if (state->wpm[9] >= 10 && state->wpm[9] < 100) {
         lv_canvas_draw_text(canvas, 9, 75, 50, &label_dsc_wpm, wpm_text);
         // lv_canvas_draw_text(canvas, 8, 75, 50, &label_dsc_wpm, wpm_text); // with
         // global font
