@@ -17,6 +17,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "battery.h"
 #include "output.h"
 #include "screen_peripheral.h"
+#include "wpm.h"
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void update_display(void);
@@ -26,17 +27,35 @@ static void update_display(void);
  **/
 
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
-    lv_obj_t *canvas = lv_obj_get_child(widget, 0);    // Peripheral display: Show basic info only (no complex syncing for now)
-    // TODO: Implement proper split sync system later
-    
-    // For now, just show basic peripheral status
+    lv_obj_t *canvas = lv_obj_get_child(widget, 0);
+
+    // Peripheral (left) display: Show Bluetooth, battery, and WPM meter like it would appear on main screen
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
-      // Show "PERIPHERAL" indicator
+    draw_wpm_status(canvas, state);
+
+    // Rotate for horizontal display
+    rotate_canvas(canvas, cbuf);
+}
+    
+    // Draw layer letter/name
     lv_draw_label_dsc_t label_dsc;
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &lv_font_montserrat_12, LV_TEXT_ALIGN_CENTER);
-    lv_canvas_draw_text(canvas, 0, 50, 64, &label_dsc, "PERIPHERAL");
+    
+    char layer_text[10] = {};
+    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+    if (state->layer_label && strlen(state->layer_label) > 0) {
+        snprintf(layer_text, sizeof(layer_text), "%s", state->layer_label);
+    } else {
+        snprintf(layer_text, sizeof(layer_text), "L%d", state->layer_index);
+    }
+    #else
+    // For peripheral builds, show default layer
+    snprintf(layer_text, sizeof(layer_text), "L0");
+    #endif
+    
+    lv_canvas_draw_text(canvas, 10, 120, 48, &label_dsc, layer_text);
 
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);

@@ -66,15 +66,13 @@ static struct zmk_widget_hid_indicators hid_indicators_widget;
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
-    // Central/Main (right) display: Show simple layout with activity bar, battery, and basic info
+    // Central/Main (right) display: Show Bluetooth, battery, and layer only (no WPM or other meters)
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
-    
-    // Show layer info as simple indicators
     draw_layer_status(canvas, state);
 
-    // Send data to peripheral for full meters display
+    // Send data to peripheral for WPM display
     #if IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     sync_data_to_peripheral(state);
     #endif
