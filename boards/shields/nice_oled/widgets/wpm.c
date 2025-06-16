@@ -5,8 +5,18 @@
 #include <zmk/wpm.h>
 
 LV_IMG_DECLARE(gauge);
-LV_IMG_DECLARE(grid);
-
+LV_IMG_DECLAR    } else {
+        lv_canvas_draw_text(canvas, 7, 75, 50, &label_dsc_wpm, wpm_text);
+        // lv_canvas_draw_text(canvas, 5, 75, 50, &label_dsc_wpm, wmp_text); // with
+        // global font
+    }
+#else
+    // For peripheral builds, try to get current WPM state
+    // WPM counting happens on central, but peripheral can display last known state
+    int current_wpm = zmk_wpm_get_state();
+    snprintf(wpm_text, sizeof(wpm_text), "%d", current_wpm);
+    lv_canvas_draw_text(canvas, 12, 75, 50, &label_dsc_wpm, wpm_text);
+#endif
 static void draw_gauge(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_img_dsc_t img_dsc;
     lv_draw_img_dsc_init(&img_dsc);
