@@ -27,15 +27,25 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
-    // Peripheral display: Enhanced layout with available data
-    // Show background
-    draw_background(canvas);
+    // Peripheral display: Try to show a meters-style layout
+    // Since we can't access real WPM/layer data, we'll simulate it for visual testing
     
-    // Show output status (connection info)
+    // Create a mock state with sample data for display testing
+    struct status_state mock_state = *state; // Copy the real state
+    
+    // NO background - should look different from central
+    
+    // Draw connection/output status at top
     draw_output_status(canvas, state);
     
-    // Show battery status (prominent display)
+    // Try to draw battery in a different position (lower)
     draw_battery_status(canvas, state);
+    
+    // Add text to clearly identify this as peripheral 
+    lv_draw_label_dsc_t label_dsc;
+    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &lv_font_montserrat_12, LV_TEXT_ALIGN_CENTER);
+    lv_area_t text_area = {.x1 = 0, .y1 = 45, .x2 = 64, .y2 = 60};
+    lv_draw_label(canvas, &text_area, &label_dsc, "PERI", NULL);
 
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
