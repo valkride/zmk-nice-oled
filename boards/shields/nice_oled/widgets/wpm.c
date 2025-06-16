@@ -122,10 +122,10 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
     for (int i = 0; i < 10; i++) {
         if (state->wpm[i] > max) {
             max = state->wpm[i];
-        }
-        if (state->wpm[i] < min) {
+        }        if (state->wpm[i] < min) {
             min = state->wpm[i];
-        }    }
+        }
+    }
     #endif
     
     int range = max - min;
@@ -163,11 +163,11 @@ static void draw_label(lv_obj_t *canvas, const struct status_state *state) {
     if (state->wpm[9] < 10) {
         lv_canvas_draw_text(canvas, 12, 75, 50, &label_dsc_wpm, wpm_text);
         // lv_canvas_draw_text(canvas, 12, 75, 50, &label_dsc_wpm, wpm_text); //
-        // with global font
-    } else if (state->wpm[9] >= 10 && state->wpm[9] < 100) {
+        // with global font    } else if (state->wpm[9] >= 10 && state->wpm[9] < 100) {
         lv_canvas_draw_text(canvas, 9, 75, 50, &label_dsc_wpm, wpm_text);
         // lv_canvas_draw_text(canvas, 8, 75, 50, &label_dsc_wpm, wpm_text); // with
-        // global font    } else {
+        // global font
+    } else {
         lv_canvas_draw_text(canvas, 7, 75, 50, &label_dsc_wpm, wpm_text);
         // lv_canvas_draw_text(canvas, 5, 75, 50, &label_dsc_wmp, wmp_text); // with
         // global font
