@@ -33,12 +33,10 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
-    
-    // Show "PERIPHERAL" indicator
+      // Show "PERIPHERAL" indicator
     lv_draw_label_dsc_t label_dsc;
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &lv_font_montserrat_12, LV_TEXT_ALIGN_CENTER);
-    lv_area_t text_area = {.x1 = 0, .y1 = 50, .x2 = 64, .y2 = 64};
-    lv_draw_label(canvas, &text_area, &label_dsc, "PERIPHERAL", NULL);
+    lv_canvas_draw_text(canvas, 0, 50, 64, &label_dsc, "PERIPHERAL");
 
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);

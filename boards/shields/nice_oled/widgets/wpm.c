@@ -87,7 +87,8 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
     int max = CONFIG_NICE_OLED_GEM_ANIMATION_WPM_FIXED_RANGE_MAX;
     if (max == 0) {
         max = 100;
-    }    int value = 0;
+    }
+    int value = 0;
     #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     for (int i = 0; i < 10; i++) {
         value = state->wpm[i];
@@ -100,8 +101,15 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
         points[i].y = 127 - (value * 32 / max);
         // points[i].y = 132 - (value * 32 / max);
     }
+    #else
+    // For peripheral builds, set default points
+    for (int i = 0; i < 10; i++) {
+        points[i].x = -36 + i * 7.4;
+        points[i].y = 127;
+    }
     #endif
-#else    int max = 0;
+#else
+    int max = 0;
     int min = 256;
 
     #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
@@ -122,6 +130,12 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
     for (int i = 0; i < 10; i++) {
         points[i].x = 0 + i * 7.4;
         points[i].y = 97 - (state->wpm[i] - min) * 32 / range;
+    }
+    #else
+    // For peripheral builds, set default points
+    for (int i = 0; i < 10; i++) {
+        points[i].x = 0 + i * 7.4;
+        points[i].y = 97;
     }
     #endif
 #endif

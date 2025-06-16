@@ -20,7 +20,12 @@ static void draw_active_profile(lv_obj_t *canvas,
   lv_draw_rect_dsc_t rect_white_dsc;
   init_rect_dsc(&rect_white_dsc, LVGL_FOREGROUND);
 
+  #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
   int offset = state->active_profile_index * 7;
+  #else
+  // For peripheral builds, use default profile 0
+  int offset = 0;
+  #endif
 
   lv_canvas_draw_rect(canvas, 0 + offset, 137, 3, 3, &rect_white_dsc);
   // lv_canvas_draw_rect(canvas, 18 + offset, 129, 3, 3, &rect_white_dsc);
@@ -36,7 +41,12 @@ static void draw_active_profile_text(lv_obj_t *canvas,
 
   // buffer size should be enough for largest number + null character
   char text[14] = {};
+  #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
   snprintf(text, sizeof(text), "%d", state->active_profile_index + 1);
+  #else
+  // For peripheral builds, show default profile 1
+  snprintf(text, sizeof(text), "1");
+  #endif
 
   lv_canvas_draw_text(canvas, 25, 32, 35, &label_dsc, text);
 }
