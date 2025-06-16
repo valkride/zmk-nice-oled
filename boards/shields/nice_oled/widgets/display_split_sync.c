@@ -3,7 +3,6 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <string.h>
-#include <zmk/split/bluetooth/central.h>
 #include <zmk/split/bluetooth/peripheral.h>
 #include <zmk/event_manager.h>
 

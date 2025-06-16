@@ -20,17 +20,24 @@ static void draw_needle(lv_obj_t *canvas, const struct status_state *state) {
     int centerX = 12; // 16 default
     int centerY = 90; // 100 gut, 66 default
     int offset = 5;   // 5 def, largo de la aguja
+    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     int value = state->wpm[9];
+    #else
+    // For peripheral builds, wpm field doesn't exist in status_state
+    int value = 0;
+    #endif
 
 #if IS_ENABLED(CONFIG_NICE_OLED_GEM_ANIMATION_WPM_FIXED_RANGE)
     float max = CONFIG_NICE_OLED_GEM_ANIMATION_WPM_FIXED_RANGE_MAX;
 #else
     float max = 0;
+    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     for (int i = 0; i < 10; i++) {
         if (state->wpm[i] > max) {
             max = state->wpm[i];
         }
     }
+    #endif
 #endif
     if (max == 0)
         max = 100;
@@ -80,9 +87,8 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
     int max = CONFIG_NICE_OLED_GEM_ANIMATION_WPM_FIXED_RANGE_MAX;
     if (max == 0) {
         max = 100;
-    }
-
-    int value = 0;
+    }    int value = 0;
+    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     for (int i = 0; i < 10; i++) {
         value = state->wpm[i];
         if (value > max) {
@@ -94,10 +100,11 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
         points[i].y = 127 - (value * 32 / max);
         // points[i].y = 132 - (value * 32 / max);
     }
-#else
-    int max = 0;
+    #endif
+#else    int max = 0;
     int min = 256;
 
+    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     for (int i = 0; i < 10; i++) {
         if (state->wpm[i] > max) {
             max = state->wpm[i];
@@ -106,16 +113,17 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
             min = state->wpm[i];
         }
     }
+    #endif
 
     int range = max - min;
     if (range == 0) {
         range = 1;
-    }
-
+    }    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     for (int i = 0; i < 10; i++) {
         points[i].x = 0 + i * 7.4;
         points[i].y = 97 - (state->wpm[i] - min) * 32 / range;
     }
+    #endif
 #endif
 
     lv_canvas_draw_line(canvas, points, 10, &line_dsc);
@@ -126,10 +134,9 @@ static void draw_label(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_label_dsc_t label_dsc_wpm;
     init_label_dsc(&label_dsc_wpm, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_LEFT);
     // init_label_dsc(&label_dsc_wpm, LVGL_FOREGROUND, &pixel_operator_mono,
-    // LV_TEXT_ALIGN_LEFT);
+    // LV_TEXT_ALIGN_LEFT);    char wpm_text[10] = {};
 
-    char wpm_text[10] = {};
-
+    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     snprintf(wpm_text, sizeof(wpm_text), "%d", state->wpm[9]);
     // if wpm < 10, elsse if wpm => 10 and wpm < 100, else wpm >= 100
     if (state->wpm[9] < 10) {
@@ -145,6 +152,11 @@ static void draw_label(lv_obj_t *canvas, const struct status_state *state) {
         // lv_canvas_draw_text(canvas, 5, 75, 50, &label_dsc_wpm, wpm_text); // with
         // global font
     }
+    #else
+    // For peripheral builds, show placeholder
+    snprintf(wpm_text, sizeof(wpm_text), "0");
+    lv_canvas_draw_text(canvas, 12, 75, 50, &label_dsc_wpm, wpm_text);
+    #endif
 }
 
 void draw_wpm_status(lv_obj_t *canvas, const struct status_state *state) {
