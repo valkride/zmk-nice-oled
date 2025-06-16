@@ -2,6 +2,7 @@
 #include "../assets/custom_fonts.h"
 #include <math.h>
 #include <zephyr/kernel.h>
+#include <zmk/wpm.h>
 
 LV_IMG_DECLARE(gauge);
 LV_IMG_DECLARE(grid);
@@ -164,10 +165,11 @@ static void draw_label(lv_obj_t *canvas, const struct status_state *state) {    
         lv_canvas_draw_text(canvas, 7, 75, 50, &label_dsc_wpm, wpm_text);
         // lv_canvas_draw_text(canvas, 5, 75, 50, &label_dsc_wpm, wpm_text); // with
         // global font
-    }
-    #else
-    // For peripheral builds, show placeholder
-    snprintf(wpm_text, sizeof(wpm_text), "0");
+    }    #else
+    // For peripheral builds, try to get current WPM state
+    // WPM counting happens on central, but peripheral can display last known state
+    int current_wpm = zmk_wpm_get_state();
+    snprintf(wpm_text, sizeof(wpm_text), "%d", current_wpm);
     lv_canvas_draw_text(canvas, 12, 75, 50, &label_dsc_wpm, wpm_text);
     #endif
 }

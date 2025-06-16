@@ -10,8 +10,10 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
+#include <zmk/events/wpm_state_changed.h>
 #include <zmk/split/bluetooth/peripheral.h>
 #include <zmk/usb.h>
+#include <zmk/wpm.h>
 
 #include "animation.h"
 #include "battery.h"
@@ -21,6 +23,18 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void update_display(void);
+
+/**
+ * Status state structures
+ **/
+
+struct peripheral_status_state {
+    bool connected;
+};
+
+struct wpm_status_state {
+    uint8_t wpm;
+};
 
 /**
  * Draw canvas
@@ -112,6 +126,32 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_s
 ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
 
 /**
+ * WPM status
+ **/
+
+static void set_wpm_status(struct zmk_widget_screen *widget, struct wpm_status_state state) {
+    for (int i = 0; i < 9; i++) {
+        widget->state.wpm[i] = widget->state.wpm[i + 1];
+    }
+    widget->state.wpm[9] = state.wpm;
+
+    update_display();
+}
+
+static void wpm_status_update_cb(struct wpm_status_state state) {
+    struct zmk_widget_screen *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_wpm_status(widget, state); }
+}
+
+struct wpm_status_state wpm_status_get_state(const zmk_event_t *eh) {
+    return (struct wpm_status_state){.wpm = zmk_wpm_get_state()};
+};
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status, struct wpm_status_state, wpm_status_update_cb,
+                            wpm_status_get_state)
+ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
+
+/**
  * Initialization
  **/
 
@@ -124,10 +164,10 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
     // Boot animation removed for peripheral display to show WPM clearly
     // draw_animation(canvas, widget);
-    
-    // Initialize local status tracking
+      // Initialize local status tracking
     widget_battery_status_init();
     widget_peripheral_status_init();
+    widget_wpm_status_init();
 
     return 0;
 }
