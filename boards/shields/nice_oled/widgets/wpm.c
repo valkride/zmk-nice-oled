@@ -121,12 +121,11 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
             min = state->wpm[i];
         }
     }
-    #endif
-
-    int range = max - min;
+    #endif    int range = max - min;
     if (range == 0) {
         range = 1;
-    }    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+    }
+    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     for (int i = 0; i < 10; i++) {
         points[i].x = 0 + i * 7.4;
         points[i].y = 97 - (state->wpm[i] - min) * 32 / range;
@@ -144,11 +143,11 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
 }
 #endif
 
-static void draw_label(lv_obj_t *canvas, const struct status_state *state) {
-    lv_draw_label_dsc_t label_dsc_wpm;
+static void draw_label(lv_obj_t *canvas, const struct status_state *state) {    lv_draw_label_dsc_t label_dsc_wpm;
     init_label_dsc(&label_dsc_wpm, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_LEFT);
     // init_label_dsc(&label_dsc_wpm, LVGL_FOREGROUND, &pixel_operator_mono,
-    // LV_TEXT_ALIGN_LEFT);    char wpm_text[10] = {};
+    // LV_TEXT_ALIGN_LEFT);
+    char wpm_text[10] = {};
 
     #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     snprintf(wpm_text, sizeof(wpm_text), "%d", state->wpm[9]);
