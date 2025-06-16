@@ -5,10 +5,7 @@
 #include <zmk/wpm.h>
 
 LV_IMG_DECLARE(gauge);
-LV_IMG_DE    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    snprintf(wpm_text, sizeof(wpm_text), "%d", state->wpm[9]);
-    // if wpm < 10, else if wpm >= 10 and wpm < 100, else wmp >= 100
-    if (state->wpm[9] < 10) {RE(needle);
+LV_IMG_DECLARE(needle);
 
 #if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_WPM_LUNA)
 #else
