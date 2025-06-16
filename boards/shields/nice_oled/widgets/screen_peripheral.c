@@ -39,6 +39,9 @@ static void update_display(void);
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
+    // TEMPORARY: Force sync active for testing - uncomment next line to test meters
+    // extended_state.sync_active = true;
+
     // Peripheral display: Show FULL meters layout using synced data
     if (extended_state.sync_active) {
         // We have synced data - show full meters like original central display!
@@ -50,16 +53,22 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
         draw_profile_status(canvas, state);
         draw_layer_status(canvas, state);
         
+        // Add small sync indicator
+        lv_draw_label_dsc_t label_dsc;
+        init_label_dsc(&label_dsc, LVGL_FOREGROUND, &lv_font_montserrat_8, LV_TEXT_ALIGN_RIGHT);
+        lv_area_t sync_area = {.x1 = 50, .y1 = 0, .x2 = 64, .y2 = 8};
+        lv_draw_label(canvas, &sync_area, &label_dsc, "SYNC", NULL);
+        
     } else {
         // Fallback: basic peripheral display if no sync
         draw_background(canvas);
         draw_output_status(canvas, state);
         draw_battery_status(canvas, state);
         
-        // Show "NO SYNC" indicator
+        // Show "NO SYNC" indicator prominently
         lv_draw_label_dsc_t label_dsc;
-        init_label_dsc(&label_dsc, LVGL_FOREGROUND, &lv_font_montserrat_10, LV_TEXT_ALIGN_CENTER);
-        lv_area_t text_area = {.x1 = 0, .y1 = 50, .x2 = 64, .y2 = 64};
+        init_label_dsc(&label_dsc, LVGL_FOREGROUND, &lv_font_montserrat_12, LV_TEXT_ALIGN_CENTER);
+        lv_area_t text_area = {.x1 = 0, .y1 = 40, .x2 = 64, .y2 = 60};
         lv_draw_label(canvas, &text_area, &label_dsc, "NO SYNC", NULL);
     }
 
