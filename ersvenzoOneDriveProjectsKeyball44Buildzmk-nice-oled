@@ -1,0 +1,20 @@
+[33m1db9972[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Remove accidentally created file with corrupted name
+[33ma27b882[m Complete OLED display content swap with compilation fix
+[33m903044d[m 	modified:   boards/shields/nice_oled/widgets/screen_peripheral.c
+[33m601aafa[m 	modified:   boards/shields/nice_oled/widgets/screen.c
+[33m0e60fd2[m 	modified:   boards/shields/nice_oled/widgets/screen.c
+[33mdf6b785[m 	modified:   boards/shields/nice_oled/widgets/screen.c
+[33meb2d50e[m 	modified:   zephyr/module.yml
+[33mbeb7d6f[m 	modified:   zephyr/module.yml
+[33m5d7dce2[m fix: small correction on hid
+[33me62c154[m feat: CONFIG_NICE_OLED_WIDGET_HID_INDICATORS_LUNA_ONLY_CAPSLOCK, README updated
+[33m10cf075[m small README.md correction
+[33m0312be2[m feat: new shield nice_epaper, hid, modifiers, luna the dog, smart batt (experimental)
+[33m9593918[m fix(anim): set CONFIG_NICE_OLED_GEM_ANIMATION=n for disable animation on slave side
+[33m3209685[m unnecessary workflow removed
+[33m5a1302f[m documentation extended in README.md
+[33m8125393[m Output background removed, now the screen is cleaner
+[33mf67688f[m CONFIG_ZMK_DISPLAY_BLANK_ON_IDLE fixed, layer status long fixed, new small fonts added
+[33m73bfa5f[m view selected profile fixed. Points are now shown instead of numbers.
+[33m2a90780[m Initial commit nice_oled
+[33m30dfe0f[m Initial commit
