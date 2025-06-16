@@ -28,14 +28,6 @@ static void update_display(void);
  * Status state structures
  **/
 
-struct peripheral_status_state {
-    bool connected;
-};
-
-struct wpm_status_state {
-    uint8_t wpm;
-};
-
 /**
  * Draw canvas
  **/
