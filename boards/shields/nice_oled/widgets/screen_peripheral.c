@@ -5,12 +5,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #include <zmk/battery.h>
 #include <zmk/ble.h>
-#i      // Initialize local status tracking
-    widget_battery_status_init();
-    widget_peripheral_status_init();
-#if IS_ENABLED(CONFIG_ZMK_WPM)
-    widget_wpm_status_init();
-#endifde <zmk/display.h>
+#include <zmk/display.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
@@ -162,14 +157,18 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     lv_obj_set_size(widget->obj, CANVAS_HEIGHT, CANVAS_WIDTH);
 
     lv_obj_t *canvas = lv_canvas_create(widget->obj);
-    lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
+    lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
+    
+    sys_slist_append(&widgets, &widget->node);
     // Boot animation removed for peripheral display to show WPM clearly
     // draw_animation(canvas, widget);
-      // Initialize local status tracking
+    
+    // Initialize local status tracking
     widget_battery_status_init();
     widget_peripheral_status_init();
+#if IS_ENABLED(CONFIG_ZMK_WPM)
     widget_wpm_status_init();
+#endif
 
     return 0;
 }
