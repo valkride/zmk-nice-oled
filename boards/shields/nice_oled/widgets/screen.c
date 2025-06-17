@@ -61,11 +61,12 @@ static struct zmk_widget_hid_indicators hid_indicators_widget;
  **/
 
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
-    lv_obj_t *canvas = lv_obj_get_child(widget, 0);    // Central/Main (right) display: Show Bluetooth, battery, and layer only (no WPM or other meters)
+    lv_obj_t *canvas = lv_obj_get_child(widget, 0);    // Central/Main (right) display: Show Bluetooth, battery, layer, and profile
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
     draw_layer_status(canvas, state);
+    draw_profile_status(canvas, state);
 
     // Note: Data sync to peripheral removed - peripheral now handles WPM independently
 
