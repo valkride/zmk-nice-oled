@@ -137,6 +137,21 @@ static void display_sync_received(const struct display_sync_data *sync_data) {
     }
 }
 
+// Temporary test function to simulate WPM data
+static void initialize_test_wpm_data(void) {
+    struct zmk_widget_screen *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
+        // Set some test WPM data to verify the display is working
+        for (int i = 0; i < 10; i++) {
+            widget->state.wpm[i] = 10 + (i * 5); // Generate test data: 10, 15, 20, 25... up to 55
+        }
+        widget->state.wpm[9] = 42; // Current WPM for label display
+        
+        // Update display
+        draw_canvas(widget->obj, widget->cbuf, &widget->state);
+    }
+}
+
 /**
  * Initialization
  **/
@@ -150,14 +165,16 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     
     sys_slist_append(&widgets, &widget->node);
     // Boot animation removed for peripheral display to show WPM clearly
-    // draw_animation(canvas, widget);
-      // Initialize local status tracking
+    // draw_animation(canvas, widget);    // Initialize local status tracking
     widget_battery_status_init();
     widget_peripheral_status_init();
     
     // Register for display sync data from central
     display_split_sync_register_callback(display_sync_received);
     display_split_sync_init();
+    
+    // Initialize test WPM data to verify display functionality
+    initialize_test_wpm_data();
 
     return 0;
 }
