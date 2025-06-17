@@ -125,12 +125,12 @@ ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
 
 #if IS_ENABLED(CONFIG_ZMK_WPM)
 static void set_wpm_status(struct zmk_widget_screen *widget, struct wpm_status_state state) {
-#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+    // Update WPM array for peripheral display
     for (int i = 0; i < 9; i++) {
         widget->state.wpm[i] = widget->state.wpm[i + 1];
     }
     widget->state.wpm[9] = state.wpm;
-#endif
+    
     update_display();
 }
 
