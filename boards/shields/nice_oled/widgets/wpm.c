@@ -130,7 +130,6 @@ static void draw_label(lv_obj_t *canvas, const struct status_state *state) {
     // LV_TEXT_ALIGN_LEFT);
     char wpm_text[10] = {};
 
-    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     snprintf(wpm_text, sizeof(wpm_text), "%d", state->wpm[9]);
     // if wpm < 10, else if wpm >= 10 and wpm < 100, else wpm >= 100
     if (state->wpm[9] < 10) {
@@ -143,7 +142,7 @@ static void draw_label(lv_obj_t *canvas, const struct status_state *state) {
         // global font
     } else {
         lv_canvas_draw_text(canvas, 7, 75, 50, &label_dsc_wpm, wpm_text);
-        // lv_canvas_draw_text(canvas, 5, 75, 50, &label_dsc_wmp, wmp_text); // with
+        // lv_canvas_draw_text(canvas, 5, 75, 50, &label_dsc_wpm, wpm_text); // with
         // global font
     }
 }
