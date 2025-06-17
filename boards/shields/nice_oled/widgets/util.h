@@ -27,6 +27,7 @@ struct status_state {
   uint8_t mod_state;
 #else
   bool connected;
+  uint8_t wpm[10];  // Add WPM support for peripheral displays
 #endif
 };
 
