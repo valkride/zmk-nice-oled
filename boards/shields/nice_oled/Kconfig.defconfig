@@ -68,7 +68,7 @@ config NICE_OLED_VIM
     default n
 
 config NICE_OLED_VIP_MARCOS
-bool "Enable static vim_marcos on peripheral"
+    bool "Enable static vim_marcos on peripheral"
     default n
 
 config NICE_OLED_WIDGET_MASTER_TEST
