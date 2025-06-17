@@ -13,18 +13,19 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/endpoint_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
-// Note: wpm_state_changed.h removed - WPM now handled by peripheral
+#include <zmk/events/wpm_state_changed.h>
 #include <zmk/keymap.h>
 #include <zmk/usb.h>
-// Note: zmk/wpm.h removed - WPM now handled by peripheral
+#include <zmk/wpm.h>
 #include <string.h>
 
 #include "battery.h"
+#include "display_split_sync.h"
 #include "layer.h"
 #include "output.h"
 #include "profile.h"
 #include "screen.h"
-// Note: "wpm.h" and "display_split_sync.h" removed - WPM now handled independently by peripheral
+#include "wpm.h"
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
@@ -179,6 +180,47 @@ ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
 #endif
 
 /**
+ * WPM status - for sync to peripheral only (not displayed on main)
+ **/
+
+static void set_wpm_status_for_sync(struct zmk_widget_screen *widget, struct wpm_status_state state) {
+    // Update WPM array for sync to peripheral
+    for (int i = 0; i < 9; i++) {
+        widget->state.wpm[i] = widget->state.wpm[i + 1];
+    }
+    widget->state.wpm[9] = state.wpm;
+    
+    // Send sync data to peripheral
+    struct display_sync_data sync_data = {0};
+    memcpy(sync_data.wpm, widget->state.wpm, sizeof(sync_data.wpm));
+    sync_data.layer_index = widget->state.layer_index;
+    if (widget->state.layer_label) {
+        strncpy(sync_data.layer_label, widget->state.layer_label, sizeof(sync_data.layer_label) - 1);
+    }
+    sync_data.active_profile_index = widget->state.active_profile_index;
+    sync_data.active_profile_connected = widget->state.active_profile_connected;
+    sync_data.active_profile_bonded = widget->state.active_profile_bonded;
+    sync_data.selected_endpoint = widget->state.selected_endpoint;
+    
+    display_split_sync_send_data(&sync_data);
+    
+    // Note: No need to redraw canvas since WPM is not displayed on main screen
+}
+
+static void wpm_status_update_cb_for_sync(struct wpm_status_state state) {
+    struct zmk_widget_screen *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_wpm_status_for_sync(widget, state); }
+}
+
+static struct wpm_status_state wpm_status_get_state_for_sync(const zmk_event_t *eh) {
+    return (struct wpm_status_state){.wpm = zmk_wpm_get_state()};
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status_sync, struct wpm_status_state, 
+                            wpm_status_update_cb_for_sync, wpm_status_get_state_for_sync);
+ZMK_SUBSCRIPTION(widget_wpm_status_sync, zmk_wpm_state_changed);
+
+/**
  * WPM status - REMOVED from main display (now handled by peripheral)
  **/
 
@@ -194,12 +236,11 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
 
     lv_obj_t *canvas = lv_canvas_create(widget->obj);
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
-    widget_battery_status_init();
+    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);    widget_battery_status_init();
     widget_layer_status_init();
     widget_output_status_init();
-    // Note: widget_wpm_status_init() removed - WPM now handled by peripheral display
-    // Note: display_split_sync_init() removed - sync functionality no longer needed
+    widget_wpm_status_sync_init();  // Initialize WPM sync for peripheral
+    display_split_sync_init();      // Initialize split sync system
 
 #if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_WPM)
     zmk_widget_luna_init(&luna_widget, canvas);

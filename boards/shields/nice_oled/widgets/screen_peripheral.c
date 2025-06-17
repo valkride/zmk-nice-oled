@@ -10,13 +10,13 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
-#include <zmk/events/wpm_state_changed.h>
 #include <zmk/split/bluetooth/peripheral.h>
 #include <zmk/usb.h>
-#include <zmk/wpm.h>
+#include <string.h>
 
 #include "animation.h"
 #include "battery.h"
+#include "display_split_sync.h"
 #include "output.h"
 #include "screen_peripheral.h"
 #include "wpm.h"
@@ -120,33 +120,24 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_s
 ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
 
 /**
- * WPM status
+ * WPM status - received via split sync system
  **/
 
-#if IS_ENABLED(CONFIG_ZMK_WPM)
-static void set_wpm_status(struct zmk_widget_screen *widget, struct wpm_status_state state) {
-    // Update WPM array for peripheral display
-    for (int i = 0; i < 9; i++) {
-        widget->state.wpm[i] = widget->state.wpm[i + 1];
+static void display_sync_received(const struct display_sync_data *sync_data) {
+    if (!sync_data) {
+        return;
     }
-    widget->state.wpm[9] = state.wpm;
     
-    update_display();
-}
-
-static void wpm_status_update_cb(struct wpm_status_state state) {
+    // Update all widgets with the received sync data
     struct zmk_widget_screen *widget;
-    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_wpm_status(widget, state); }
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
+        // Copy WPM data from sync
+        memcpy(widget->state.wpm, sync_data->wpm, sizeof(widget->state.wpm));
+        
+        // Update display
+        draw_canvas(widget->obj, widget->cbuf, &widget->state);
+    }
 }
-
-struct wpm_status_state wpm_status_get_state(const zmk_event_t *eh) {
-    return (struct wpm_status_state){.wpm = zmk_wpm_get_state()};
-};
-
-ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status, struct wpm_status_state, wpm_status_update_cb,
-                            wpm_status_get_state)
-ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
-#endif /* IS_ENABLED(CONFIG_ZMK_WPM) */
 
 /**
  * Initialization
@@ -162,13 +153,13 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     sys_slist_append(&widgets, &widget->node);
     // Boot animation removed for peripheral display to show WPM clearly
     // draw_animation(canvas, widget);
-    
-    // Initialize local status tracking
+      // Initialize local status tracking
     widget_battery_status_init();
     widget_peripheral_status_init();
-#if IS_ENABLED(CONFIG_ZMK_WPM)
-    widget_wpm_status_init();
-#endif
+    
+    // Register for display sync data from central
+    display_split_sync_register_callback(display_sync_received);
+    display_split_sync_init();
 
     return 0;
 }

@@ -105,14 +105,6 @@ config NICE_OLED_WIDGET_LAYER_RGB
 
 endif # !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
 
-# Enable WPM for peripheral displays too
-if ZMK_SPLIT && !ZMK_SPLIT_ROLE_CENTRAL
-
-config NICE_VIEW_WIDGET_STATUS
-    select ZMK_WPM
-
-endif # ZMK_SPLIT && !ZMK_SPLIT_ROLE_CENTRAL
-
 endif # SHIELD_NICE_OLED
 endif # NICE_EPAPER_ON
 
