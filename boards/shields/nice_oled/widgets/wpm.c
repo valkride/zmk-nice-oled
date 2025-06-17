@@ -4,7 +4,7 @@
 #include <zephyr/kernel.h>
 #include <zmk/wpm.h>
 
-LV_IMG_DECLAR    } else if (state->wpm[9] >= 10 && state->wpm[9] < 100) {(gauge);
+LV_IMG_DECLARE(gauge);
 LV_IMG_DECLARE(needle);
 
 #if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_WPM_LUNA)
