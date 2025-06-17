@@ -37,9 +37,7 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
-#if IS_ENABLED(CONFIG_ZMK_WPM)
-    draw_wpm_status(canvas, state);
-#endif
+    draw_wpm_status(canvas, state);  // Always draw WPM on peripheral
     
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);

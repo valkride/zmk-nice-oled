@@ -4,7 +4,7 @@
 #include <zephyr/kernel.h>
 #include <zmk/wpm.h>
 
-LV_IMG_DECLARE(gauge);
+LV_IMG_DECLAR    } else if (state->wpm[9] >= 10 && state->wpm[9] < 100) {(gauge);
 LV_IMG_DECLARE(needle);
 
 #if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_WPM_LUNA)
@@ -21,29 +21,20 @@ static void draw_gauge(lv_obj_t *canvas, const struct status_state *state) {
 
 static void draw_needle(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_line_dsc_t line_dsc;
-    init_line_dsc(&line_dsc, LVGL_FOREGROUND, 1);
-
-    int centerX = 12; // 16 default
+    init_line_dsc(&line_dsc, LVGL_FOREGROUND, 1);    int centerX = 12; // 16 default
     int centerY = 90; // 100 gut, 66 default
     int offset = 5;   // 5 def, largo de la aguja
-    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    int value = state->wpm[9];
-    #else
-    // For peripheral builds, wpm field doesn't exist in status_state
-    int value = 0;
-    #endif
+    int value = state->wpm[9];  // WPM value now available on both central and peripheral
 
 #if IS_ENABLED(CONFIG_NICE_OLED_GEM_ANIMATION_WPM_FIXED_RANGE)
     float max = CONFIG_NICE_OLED_GEM_ANIMATION_WPM_FIXED_RANGE_MAX;
 #else
     float max = 0;
-    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     for (int i = 0; i < 10; i++) {
         if (state->wpm[i] > max) {
             max = state->wpm[i];
         }
     }
-    #endif
 #endif
     if (max == 0)
         max = 100;
@@ -90,12 +81,10 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
     lv_point_t points[10];
 
 #if IS_ENABLED(CONFIG_NICE_OLED_GEM_ANIMATION_WPM_FIXED_RANGE)
-    int max = CONFIG_NICE_OLED_GEM_ANIMATION_WPM_FIXED_RANGE_MAX;
-    if (max == 0) {
+    int max = CONFIG_NICE_OLED_GEM_ANIMATION_WPM_FIXED_RANGE_MAX;    if (max == 0) {
         max = 100;
     }
     int value = 0;
-    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     for (int i = 0; i < 10; i++) {
         value = state->wpm[i];
         if (value > max) {
@@ -107,13 +96,6 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
         points[i].y = 127 - (value * 32 / max);
         // points[i].y = 132 - (value * 32 / max);
     }
-    #else
-    // For peripheral builds, set default points
-    for (int i = 0; i < 10; i++) {
-        points[i].x = -36 + i * 7.4;
-        points[i].y = 127;
-    }
-    #endif
 #else
     int max = 0;
     int min = 256;
@@ -127,23 +109,14 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
         }
     }
     #endif
-    
-    int range = max - min;
+      int range = max - min;
     if (range == 0) {
         range = 1;
     }
-    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     for (int i = 0; i < 10; i++) {
         points[i].x = 0 + i * 7.4;
         points[i].y = 97 - (state->wpm[i] - min) * 32 / range;
     }
-    #else
-    // For peripheral builds, set default points
-    for (int i = 0; i < 10; i++) {
-        points[i].x = 0 + i * 7.4;
-        points[i].y = 97;
-    }
-    #endif
 #endif
 
     lv_canvas_draw_line(canvas, points, 10, &line_dsc);
@@ -173,13 +146,6 @@ static void draw_label(lv_obj_t *canvas, const struct status_state *state) {
         // lv_canvas_draw_text(canvas, 5, 75, 50, &label_dsc_wmp, wmp_text); // with
         // global font
     }
-#else
-    // For peripheral builds, try to get current WPM state
-    // WPM counting happens on central, but peripheral can display last known state
-    int current_wpm = zmk_wpm_get_state();
-    snprintf(wpm_text, sizeof(wpm_text), "%d", current_wpm);
-    lv_canvas_draw_text(canvas, 12, 75, 50, &label_dsc_wpm, wpm_text);
-    #endif
 }
 
 void draw_wpm_status(lv_obj_t *canvas, const struct status_state *state) {
