@@ -65,16 +65,16 @@ int display_split_sync_init(void) {
 
 // Simulate receiving data for now
 // In a real implementation, this would be received via BLE
-static struct k_timer sync_timer;
+// static struct k_timer sync_timer;  // Disabled to avoid unused warnings
 
-static void sync_timer_handler(struct k_timer *timer) {
-    if (sync_callback) {
-        // Simulate receiving updated data from central
-        // In reality, this would come from BLE communication
-        sync_callback(&last_sync_data);
-        LOG_DBG("Received display sync data on peripheral");
-    }
-}
+// static void sync_timer_handler(struct k_timer *timer) {  // Disabled - not currently used
+//     if (sync_callback) {
+//         // Simulate receiving updated data from central
+//         // In reality, this would come from BLE communication
+//         sync_callback(&last_sync_data);
+//         LOG_DBG("Received display sync data on peripheral");
+//     }
+// }
 
 int display_split_sync_init(void) {
     LOG_INF("Initializing display split sync (peripheral)");

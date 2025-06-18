@@ -6,11 +6,8 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/battery.h>
 #include <zmk/ble.h>
 #include <zmk/display.h>
-#include <zmk/event_ma        // Use shared function to add keypress
-        add_keypress_timestamp(now);
-        
-        // Update display if enough time has passed
-        if (now - wpm_state.last_update_time > 1000) { // Update at most once per seconde <zmk/events/battery_state_changed.h>
+#include <zmk/event_manager.h>
+#include <zmk/events/battery_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/events/position_state_changed.h>
