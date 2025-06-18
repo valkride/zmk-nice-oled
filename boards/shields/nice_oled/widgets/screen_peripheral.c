@@ -10,6 +10,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
+#include <zmk/events/position_state_changed.h>
 #include <zmk/split/bluetooth/peripheral.h>
 #include <zmk/usb.h>
 #include <string.h>
@@ -115,6 +116,88 @@ static void output_status_update_cb(struct peripheral_status_state state) {
 ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_state,
                             output_status_update_cb, get_state)
 ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
+
+/**
+ * Real WPM tracking based on actual key presses
+ **/
+
+static struct {
+    uint32_t keypress_timestamps[50]; // Store last 50 keypress times
+    uint8_t keypress_count;
+    uint32_t last_update_time;
+    uint16_t current_wpm;
+} wpm_state = {0};
+
+static void calculate_wpm(void) {
+    uint32_t now = k_uptime_get_32();
+    uint32_t time_window = 60000; // 1 minute window
+    
+    // Count keypresses in the last minute
+    uint8_t recent_keypresses = 0;
+    for (int i = 0; i < wpm_state.keypress_count && i < 50; i++) {
+        if (now - wpm_state.keypress_timestamps[i] <= time_window) {
+            recent_keypresses++;
+        }
+    }
+    
+    // Calculate WPM (assuming average 5 characters per word)
+    wpm_state.current_wpm = (recent_keypresses * 60) / 5;
+    
+    // Cap at reasonable maximum
+    if (wpm_state.current_wpm > 200) {
+        wpm_state.current_wpm = 200;
+    }
+}
+
+static void update_wpm_display(void) {
+    struct zmk_widget_screen *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
+        // Shift WPM history array
+        for (int i = 0; i < 9; i++) {
+            widget->state.wpm[i] = widget->state.wpm[i + 1];
+        }
+        
+        // Add current WPM to the end
+        widget->state.wpm[9] = wpm_state.current_wpm;
+        
+        update_display();
+    }
+}
+
+static int wpm_position_listener(const zmk_event_t *eh) {
+    struct zmk_position_state_changed *pos_ev = as_zmk_position_state_changed(eh);
+    
+    // Only count key presses (not releases)
+    if (pos_ev && pos_ev->state) {
+        uint32_t now = k_uptime_get_32();
+        
+        // Add keypress timestamp
+        if (wpm_state.keypress_count < 50) {
+            wpm_state.keypress_timestamps[wpm_state.keypress_count] = now;
+            wpm_state.keypress_count++;
+        } else {
+            // Shift array and add new timestamp
+            for (int i = 0; i < 49; i++) {
+                wpm_state.keypress_timestamps[i] = wpm_state.keypress_timestamps[i + 1];
+            }
+            wpm_state.keypress_timestamps[49] = now;
+        }
+        
+        // Recalculate WPM
+        calculate_wpm();
+        
+        // Update display if enough time has passed
+        if (now - wpm_state.last_update_time > 1000) { // Update at most once per second
+            update_wpm_display();
+            wpm_state.last_update_time = now;
+        }
+    }
+    
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(wpm_position, wpm_position_listener);
+ZMK_SUBSCRIPTION(wpm_position, zmk_position_state_changed);
 
 /**
  * Simple WPM display with static data for peripheral
