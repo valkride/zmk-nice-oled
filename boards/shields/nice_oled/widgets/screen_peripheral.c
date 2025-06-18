@@ -10,8 +10,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
-#include <zmk/events/keycode_state_changed.h>
-#include <zmk/events/layer_state_changed.h>
 #include <zmk/split/bluetooth/peripheral.h>
 #include <zmk/usb.h>
 #include <string.h>
@@ -119,47 +117,36 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_s
 ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
 
 /**
- * Simple WPM tracking on peripheral
+ * Simple WPM display with static data for peripheral
  **/
 
-static void update_wpm_on_keypress(struct zmk_widget_screen *widget) {
-    // Simple WPM calculation based on local key events
-    static uint32_t last_keypress_time = 0;
-    static uint32_t key_count = 0;
-    uint32_t now = k_uptime_get_32();
-    
-    // Reset counter every minute
-    if (now - last_keypress_time > 60000) {
-        key_count = 0;
-    }
-    
-    key_count++;
-    last_keypress_time = now;
-    
-    // Simple WPM calculation (assuming 5 chars per word)
-    uint32_t wpm = (key_count * 60) / ((now / 1000) + 1) / 5;
-    if (wpm > 200) wpm = 200; // Cap at reasonable max
-    
-    // Update WPM data
-    for (int i = 0; i < 9; i++) {
-        widget->state.wpm[i] = widget->state.wpm[i + 1];
-    }
-    widget->state.wpm[9] = wpm;
-    
-    update_display();
-}
+static struct k_timer wpm_timer;
 
-static int wpm_event_listener(const zmk_event_t *eh) {    // Use layer state changed events as a proxy for key activity
-    // This is safer and more compatible than keycode events
+static void wpm_timer_handler(struct k_timer *timer) {
+    // Very lightweight WPM simulation for peripheral display
+    static uint8_t counter = 0;
+    
     struct zmk_widget_screen *widget;
     SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
-        update_wpm_on_keypress(widget);
+        // Simple animated WPM display - just for visual demonstration
+        counter = (counter + 1) % 60;
+        
+        // Shift array and add new value
+        for (int i = 0; i < 9; i++) {
+            widget->state.wpm[i] = widget->state.wpm[i + 1];
+        }
+        
+        // Simple pattern for demonstration
+        widget->state.wpm[9] = (counter % 20) + 10; // Values between 10-30
+        
+        update_display();
     }
-    return ZMK_EV_EVENT_BUBBLE;
 }
 
-ZMK_LISTENER(wpm_peripheral, wpm_event_listener);
-ZMK_SUBSCRIPTION(wpm_peripheral, zmk_layer_state_changed);
+static void init_wpm_timer(void) {
+    k_timer_init(&wpm_timer, wpm_timer_handler, NULL);
+    k_timer_start(&wpm_timer, K_SECONDS(5), K_SECONDS(5)); // Update every 5 seconds
+}
 
 /**
  * Initialization
@@ -181,6 +168,9 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     for (int i = 0; i < 10; i++) {
         widget->state.wpm[i] = 0;
     }
+    
+    // Start WPM timer for peripheral display
+    init_wpm_timer();
 
     return 0;
 }
