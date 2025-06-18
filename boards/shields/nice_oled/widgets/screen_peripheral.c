@@ -11,6 +11,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/events/keycode_state_changed.h>
+#include <zmk/events/layer_state_changed.h>
 #include <zmk/split/bluetooth/peripheral.h>
 #include <zmk/usb.h>
 #include <string.h>
@@ -148,19 +149,17 @@ static void update_wpm_on_keypress(struct zmk_widget_screen *widget) {
     update_display();
 }
 
-static int wpm_event_listener(const zmk_event_t *eh) {
-    const struct zmk_keycode_state_changed *ev = as_zmk_keycode_state_changed(eh);
-    if (ev && ev->state) { // Only on key press, not release
-        struct zmk_widget_screen *widget;
-        SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
-            update_wpm_on_keypress(widget);
-        }
+static int wpm_event_listener(const zmk_event_t *eh) {    // Use layer state changed events as a proxy for key activity
+    // This is safer and more compatible than keycode events
+    struct zmk_widget_screen *widget;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
+        update_wpm_on_keypress(widget);
     }
     return ZMK_EV_EVENT_BUBBLE;
 }
 
 ZMK_LISTENER(wpm_peripheral, wpm_event_listener);
-ZMK_SUBSCRIPTION(wpm_peripheral, zmk_keycode_state_changed);
+ZMK_SUBSCRIPTION(wpm_peripheral, zmk_layer_state_changed);
 
 /**
  * Initialization
