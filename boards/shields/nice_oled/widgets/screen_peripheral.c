@@ -120,9 +120,9 @@ ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
  * Simple WPM display with static data for peripheral
  **/
 
-static struct k_timer wpm_timer;
+static struct k_work_delayable wpm_work;
 
-static void wpm_timer_handler(struct k_timer *timer) {
+static void wpm_work_handler(struct k_work *work) {
     // Very lightweight WPM simulation for peripheral display
     static uint8_t counter = 0;
     
@@ -141,11 +141,13 @@ static void wpm_timer_handler(struct k_timer *timer) {
         
         update_display();
     }
+      // Schedule next update
+    k_work_schedule(&wpm_work, K_SECONDS(5));
 }
 
 static void init_wpm_timer(void) {
-    k_timer_init(&wpm_timer, wpm_timer_handler, NULL);
-    k_timer_start(&wpm_timer, K_SECONDS(5), K_SECONDS(5)); // Update every 5 seconds
+    k_work_init_delayable(&wpm_work, wpm_work_handler);
+    k_work_schedule(&wpm_work, K_SECONDS(5)); // Start after 5 seconds
 }
 
 /**
