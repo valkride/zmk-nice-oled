@@ -8,9 +8,9 @@
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-// Custom BLE service UUID for display sync
-#define DISPLAY_SYNC_SERVICE_UUID BT_UUID_128_ENCODE(0x12345678, 0x1234, 0x5678, 0x1234, 0x567812345678)
-#define DISPLAY_SYNC_CHAR_UUID BT_UUID_128_ENCODE(0x12345679, 0x1234, 0x5678, 0x1234, 0x567812345678)
+// BLE service UUIDs for display sync (currently unused)
+// #define DISPLAY_SYNC_SERVICE_UUID BT_UUID_128_ENCODE(0x12345678, 0x1234, 0x5678, 0x1234, 0x567812345678)
+// #define DISPLAY_SYNC_CHAR_UUID BT_UUID_128_ENCODE(0x12345679, 0x1234, 0x5678, 0x1234, 0x567812345678)
 
 static display_sync_received_callback_t sync_callback = NULL;
 static struct display_sync_data last_sync_data = {0};

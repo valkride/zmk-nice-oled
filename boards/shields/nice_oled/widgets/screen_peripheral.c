@@ -10,16 +10,16 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
+#include <zmk/events/keycode_state_changed.h>
 #include <zmk/split/bluetooth/peripheral.h>
 #include <zmk/usb.h>
 #include <string.h>
 
 #include "animation.h"
 #include "battery.h"
-// #include "display_split_sync.h" // Disabled to fix keyboard responsiveness
 #include "output.h"
 #include "screen_peripheral.h"
-// #include "wpm.h" // Disabled to fix keyboard responsiveness
+#include "wpm.h"
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void update_display(void);
@@ -33,12 +33,11 @@ static void update_display(void);
  **/
 
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
-    lv_obj_t *canvas = lv_obj_get_child(widget, 0);    // Peripheral (left) display: Show minimal info to avoid interfering with keyboard operation
+    lv_obj_t *canvas = lv_obj_get_child(widget, 0);    // Peripheral (left) display: Show WPM meter as requested
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
-    // WPM display disabled temporarily to fix keyboard responsiveness
-    // draw_wpm_status(canvas, state);
+    draw_wpm_status(canvas, state);  // Re-enabled WPM display
     
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
@@ -119,6 +118,51 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_s
 ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
 
 /**
+ * Simple WPM tracking on peripheral
+ **/
+
+static void update_wpm_on_keypress(struct zmk_widget_screen *widget) {
+    // Simple WPM calculation based on local key events
+    static uint32_t last_keypress_time = 0;
+    static uint32_t key_count = 0;
+    uint32_t now = k_uptime_get_32();
+    
+    // Reset counter every minute
+    if (now - last_keypress_time > 60000) {
+        key_count = 0;
+    }
+    
+    key_count++;
+    last_keypress_time = now;
+    
+    // Simple WPM calculation (assuming 5 chars per word)
+    uint32_t wpm = (key_count * 60) / ((now / 1000) + 1) / 5;
+    if (wpm > 200) wpm = 200; // Cap at reasonable max
+    
+    // Update WPM data
+    for (int i = 0; i < 9; i++) {
+        widget->state.wpm[i] = widget->state.wpm[i + 1];
+    }
+    widget->state.wpm[9] = wpm;
+    
+    update_display();
+}
+
+static int wpm_event_listener(const zmk_event_t *eh) {
+    const struct zmk_keycode_state_changed *ev = as_zmk_keycode_state_changed(eh);
+    if (ev && ev->state) { // Only on key press, not release
+        struct zmk_widget_screen *widget;
+        SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
+            update_wpm_on_keypress(widget);
+        }
+    }
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(wpm_peripheral, wpm_event_listener);
+ZMK_SUBSCRIPTION(wpm_peripheral, zmk_keycode_state_changed);
+
+/**
  * Initialization
  **/
 
@@ -134,9 +178,10 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     widget_battery_status_init();
     widget_peripheral_status_init();
     
-    // Sync system disabled to fix keyboard responsiveness
-    // display_split_sync_register_callback(display_sync_received);
-    // display_split_sync_init();
+    // Initialize WPM data to zero
+    for (int i = 0; i < 10; i++) {
+        widget->state.wpm[i] = 0;
+    }
 
     return 0;
 }
