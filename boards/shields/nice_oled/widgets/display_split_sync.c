@@ -30,9 +30,8 @@ static void sync_work_handler(struct k_work *work) {
     // For now, we'll use a simpler approach
     
     LOG_DBG("Sending display sync data to peripheral");
-    
-    // Schedule next sync
-    k_work_schedule(&sync_work, K_MSEC(500)); // Sync every 500ms
+      // Schedule next sync
+    k_work_schedule(&sync_work, K_MSEC(2000)); // Sync every 2 seconds to avoid overwhelming peripheral
 }
 
 int display_split_sync_send_data(const struct display_sync_data *data) {
@@ -80,9 +79,9 @@ static void sync_timer_handler(struct k_timer *timer) {
 int display_split_sync_init(void) {
     LOG_INF("Initializing display split sync (peripheral)");
     
-    // Initialize timer to simulate receiving sync data
-    k_timer_init(&sync_timer, sync_timer_handler, NULL);
-    k_timer_start(&sync_timer, K_MSEC(1000), K_MSEC(500));
+    // Disable automatic timer updates for now to avoid interfering with keyboard
+    // k_timer_init(&sync_timer, sync_timer_handler, NULL);
+    // k_timer_start(&sync_timer, K_MSEC(2000), K_MSEC(2000)); // Reduce frequency to 2 seconds
     
     return 0;
 }

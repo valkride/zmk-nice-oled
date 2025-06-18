@@ -16,10 +16,10 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #include "animation.h"
 #include "battery.h"
-#include "display_split_sync.h"
+// #include "display_split_sync.h" // Disabled to fix keyboard responsiveness
 #include "output.h"
 #include "screen_peripheral.h"
-#include "wpm.h"
+// #include "wpm.h" // Disabled to fix keyboard responsiveness
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void update_display(void);
@@ -33,11 +33,12 @@ static void update_display(void);
  **/
 
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
-    lv_obj_t *canvas = lv_obj_get_child(widget, 0);    // Peripheral (left) display: Show Bluetooth, battery, and WPM meter like it would appear on main screen
+    lv_obj_t *canvas = lv_obj_get_child(widget, 0);    // Peripheral (left) display: Show minimal info to avoid interfering with keyboard operation
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
-    draw_wpm_status(canvas, state);  // Always draw WPM on peripheral
+    // WPM display disabled temporarily to fix keyboard responsiveness
+    // draw_wpm_status(canvas, state);
     
     // Rotate for horizontal display
     rotate_canvas(canvas, cbuf);
@@ -118,50 +119,14 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_s
 ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
 
 /**
- * WPM status - received via split sync system
- **/
-
-static void display_sync_received(const struct display_sync_data *sync_data) {
-    if (!sync_data) {
-        return;
-    }
-    
-    // Update all widgets with the received sync data
-    struct zmk_widget_screen *widget;
-    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
-        // Copy WPM data from sync
-        memcpy(widget->state.wpm, sync_data->wpm, sizeof(widget->state.wpm));
-        
-        // Update display
-        draw_canvas(widget->obj, widget->cbuf, &widget->state);
-    }
-}
-
-// Temporary test function to simulate WPM data
-static void initialize_test_wpm_data(void) {
-    struct zmk_widget_screen *widget;
-    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
-        // Set some test WPM data to verify the display is working
-        for (int i = 0; i < 10; i++) {
-            widget->state.wpm[i] = 10 + (i * 5); // Generate test data: 10, 15, 20, 25... up to 55
-        }
-        widget->state.wpm[9] = 42; // Current WPM for label display
-        
-        // Update display
-        draw_canvas(widget->obj, widget->cbuf, &widget->state);
-    }
-}
-
-/**
  * Initialization
  **/
 
 int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
-    lv_obj_set_size(widget->obj, CANVAS_HEIGHT, CANVAS_WIDTH);
-
-    lv_obj_t *canvas = lv_canvas_create(widget->obj);
-    lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
+    lv_obj_set_size(widget->obj, CANVAS_HEIGHT, CANVAS_WIDTH);    lv_obj_t *canvas = lv_canvas_create(widget->obj);
+    lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
     
     sys_slist_append(&widgets, &widget->node);
     // Boot animation removed for peripheral display to show WPM clearly
@@ -169,12 +134,9 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     widget_battery_status_init();
     widget_peripheral_status_init();
     
-    // Register for display sync data from central
-    display_split_sync_register_callback(display_sync_received);
-    display_split_sync_init();
-    
-    // Initialize test WPM data to verify display functionality
-    initialize_test_wpm_data();
+    // Sync system disabled to fix keyboard responsiveness
+    // display_split_sync_register_callback(display_sync_received);
+    // display_split_sync_init();
 
     return 0;
 }
