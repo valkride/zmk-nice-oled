@@ -4,7 +4,13 @@
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #include <zmk/battery.h>
-#include <zmk/ble.h>
+#inc    // Calculate WPM properly: count recent keypresses and convert to WPM
+    if (recent_keypresses > 0) {
+        // Basic WPM: keypresses in last minute divided by 5 (chars per word)
+        wpm_state.current_wpm = recent_keypresses / 5;
+    } else {
+        wmp_state.current_wpm = 0;
+    }de <zmk/ble.h>
 #include <zmk/display.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/battery_state_changed.h>
@@ -246,19 +252,18 @@ static void wpm_work_handler(struct k_work *work) {
     static uint8_t counter = 0;
     
     struct zmk_widget_screen *widget;
-    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
-        // Simple animated WPM display - just for visual demonstration
-        counter = (counter + 1) % 60;
+    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {        // Real WPM tracking - no more simulation
+        // counter = (counter + 1) % 60;
         
-        // Shift array and add new value
-        for (int i = 0; i < 9; i++) {
-            widget->state.wpm[i] = widget->state.wpm[i + 1];
-        }
+        // No more fake data - WPM is now calculated from real keypresses
+        // for (int i = 0; i < 9; i++) {
+        //     widget->state.wpm[i] = widget->state.wpm[i + 1];
+        // }
         
-        // Simple pattern for demonstration
-        widget->state.wpm[9] = (counter % 20) + 10; // Values between 10-30
+        // Remove simulation pattern
+        // widget->state.wpm[9] = (counter % 20) + 10; // Values between 10-30
         
-        update_display();
+        // update_display(); // Display updates handled by real keypress events
     }
       // Schedule next update
     k_work_schedule(&wpm_work, K_SECONDS(5));
@@ -288,9 +293,8 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     // Initialize WPM data to zero
     for (int i = 0; i < 10; i++) {
         widget->state.wpm[i] = 0;
-    }
-      // Start WPM timer for peripheral display
-    init_wpm_timer();
+    }    // Timer disabled - real WPM tracking now handles updates  
+    // init_wmp_timer();
       // Register for split sync to receive keypress data from central
     display_split_sync_register_callback(central_keypress_received);
     display_split_sync_init();  // Enable split sync system
