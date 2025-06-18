@@ -6,8 +6,11 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/battery.h>
 #include <zmk/ble.h>
 #include <zmk/display.h>
-#include <zmk/event_manager.h>
-#include <zmk/events/battery_state_changed.h>
+#include <zmk/event_ma        // Use shared function to add keypress
+        add_keypress_timestamp(now);
+        
+        // Update display if enough time has passed
+        if (now - wpm_state.last_update_time > 1000) { // Update at most once per seconde <zmk/events/battery_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/events/position_state_changed.h>
@@ -17,6 +20,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #include "animation.h"
 #include "battery.h"
+#include "display_split_sync.h"
 #include "output.h"
 #include "screen_peripheral.h"
 #include "wpm.h"
@@ -164,6 +168,41 @@ static void update_wpm_display(void) {
     }
 }
 
+static void add_keypress_timestamp(uint32_t timestamp) {
+    // Add keypress timestamp to our tracking
+    if (wpm_state.keypress_count < 50) {
+        wpm_state.keypress_timestamps[wpm_state.keypress_count] = timestamp;
+        wpm_state.keypress_count++;
+    } else {
+        // Shift array and add new timestamp
+        for (int i = 0; i < 49; i++) {
+            wpm_state.keypress_timestamps[i] = wpm_state.keypress_timestamps[i + 1];
+        }
+        wpm_state.keypress_timestamps[49] = timestamp;
+    }
+    
+    // Recalculate WPM
+    calculate_wpm();
+}
+
+// Callback to receive keypress data from central via split sync
+static void central_keypress_received(const struct display_sync_data *sync_data) {
+    if (!sync_data) {
+        return;
+    }
+    
+    // If sync data contains a keypress timestamp, add it to our tracking
+    if (sync_data->sync_timestamp > wpm_state.last_update_time) {
+        add_keypress_timestamp(sync_data->sync_timestamp);
+        
+        uint32_t now = k_uptime_get_32();
+        if (now - wpm_state.last_update_time > 500) { // Update display
+            update_wpm_display();
+            wpm_state.last_update_time = now;
+        }
+    }
+}
+
 static int wpm_position_listener(const zmk_event_t *eh) {
     struct zmk_position_state_changed *pos_ev = as_zmk_position_state_changed(eh);
     
@@ -253,9 +292,11 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     for (int i = 0; i < 10; i++) {
         widget->state.wpm[i] = 0;
     }
-    
-    // Start WPM timer for peripheral display
+      // Start WPM timer for peripheral display
     init_wpm_timer();
+      // Register for split sync to receive keypress data from central
+    display_split_sync_register_callback(central_keypress_received);
+    display_split_sync_init();  // Enable split sync system
 
     return 0;
 }

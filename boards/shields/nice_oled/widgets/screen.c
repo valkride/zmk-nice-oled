@@ -12,6 +12,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/endpoint_changed.h>
 #include <zmk/events/layer_state_changed.h>
+#include <zmk/events/position_state_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/events/wpm_state_changed.h>
 #include <zmk/keymap.h>
@@ -219,6 +220,28 @@ static struct wpm_status_state wpm_status_get_state_for_sync(const zmk_event_t *
 ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status_sync, struct wpm_status_state, 
                             wpm_status_update_cb_for_sync, wpm_status_get_state_for_sync);
 ZMK_SUBSCRIPTION(widget_wpm_status_sync, zmk_wpm_state_changed);
+
+/**
+ * Keypress sync for WPM tracking on peripheral
+ **/
+
+static int central_keypress_listener(const zmk_event_t *eh) {
+    struct zmk_position_state_changed *pos_ev = as_zmk_position_state_changed(eh);
+    
+    // Only count key presses (not releases) from central side
+    if (pos_ev && pos_ev->state) {
+        struct display_sync_data sync_data = {0};
+        sync_data.sync_timestamp = k_uptime_get_32();  // Use current time as keypress indicator
+        
+        // Send keypress notification to peripheral
+        display_split_sync_send_data(&sync_data);
+    }
+    
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(central_keypress, central_keypress_listener);
+ZMK_SUBSCRIPTION(central_keypress, zmk_position_state_changed);
 
 /**
  * WPM status - REMOVED from main display (now handled by peripheral)
