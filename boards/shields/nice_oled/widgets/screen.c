@@ -293,29 +293,7 @@ static void set_wpm_status_for_sync(struct zmk_widget_screen *widget, struct wpm
         widget->state.wpm[i] = widget->state.wpm[i + 1];
     }
     widget->state.wpm[9] = state.wpm;
-    
-    // Note: WPM data is tracked separately for split sync but not displayed on main screen
-}
-    // Update WPM array for sync to peripheral
-    for (int i = 0; i < 9; i++) {
-        widget->state.wpm[i] = widget->state.wpm[i + 1];
-    }
-    widget->state.wpm[9] = state.wpm;
-    
-    // Send sync data to peripheral    // struct display_sync_data sync_data = {0}; // REMOVED - no longer using split sync
-    // memcpy(sync_data.wpm, widget->state.wpm, sizeof(sync_data.wpm));
-    // sync_data.layer_index = widget->state.layer_index;
-    // if (widget->state.layer_label) {
-    //     strncpy(sync_data.layer_label, widget->state.layer_label, sizeof(sync_data.layer_label) - 1);
-    // }
-    // sync_data.active_profile_index = widget->state.active_profile_index;
-    // sync_data.active_profile_connected = widget->state.active_profile_connected;
-    // sync_data.active_profile_bonded = widget->state.active_profile_bonded;
-    // sync_data.selected_endpoint = widget->state.selected_endpoint;
-    
-    // display_split_sync_send_data(&sync_data);
-    
-    // Note: WPM sync functionality removed - peripheral handles WPM independently
+      // Note: WPM data is tracked separately for split sync but not displayed on main screen
 }
 
 /*
