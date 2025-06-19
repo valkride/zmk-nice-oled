@@ -94,9 +94,9 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
         // modificar aqui par la posicion de la grafica
         points[i].x = -36 + i * 7.4;
         points[i].y = 127 - (value * 32 / max);
-        // points[i].y = 132 - (value * 32 / max);
-    }
-#else    int max = 0;
+        // points[i].y = 132 - (value * 32 / max);    }
+#else
+    int max = 0;
     int min = 256;
 
     // Always calculate min/max for both central and peripheral

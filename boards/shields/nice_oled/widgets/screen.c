@@ -190,21 +190,20 @@ static void set_wpm_status_for_sync(struct zmk_widget_screen *widget, struct wpm
     }
     widget->state.wpm[9] = state.wpm;
     
-    // Send sync data to peripheral
-    struct display_sync_data sync_data = {0};
-    memcpy(sync_data.wpm, widget->state.wpm, sizeof(sync_data.wpm));
-    sync_data.layer_index = widget->state.layer_index;
-    if (widget->state.layer_label) {
-        strncpy(sync_data.layer_label, widget->state.layer_label, sizeof(sync_data.layer_label) - 1);
-    }
-    sync_data.active_profile_index = widget->state.active_profile_index;
-    sync_data.active_profile_connected = widget->state.active_profile_connected;
-    sync_data.active_profile_bonded = widget->state.active_profile_bonded;
-    sync_data.selected_endpoint = widget->state.selected_endpoint;
+    // Send sync data to peripheral    // struct display_sync_data sync_data = {0}; // REMOVED - no longer using split sync
+    // memcpy(sync_data.wpm, widget->state.wpm, sizeof(sync_data.wpm));
+    // sync_data.layer_index = widget->state.layer_index;
+    // if (widget->state.layer_label) {
+    //     strncpy(sync_data.layer_label, widget->state.layer_label, sizeof(sync_data.layer_label) - 1);
+    // }
+    // sync_data.active_profile_index = widget->state.active_profile_index;
+    // sync_data.active_profile_connected = widget->state.active_profile_connected;
+    // sync_data.active_profile_bonded = widget->state.active_profile_bonded;
+    // sync_data.selected_endpoint = widget->state.selected_endpoint;
     
-    display_split_sync_send_data(&sync_data);
+    // display_split_sync_send_data(&sync_data);
     
-    // Note: No need to redraw canvas since WPM is not displayed on main screen
+    // Note: WPM sync functionality removed - peripheral handles WPM independently
 }
 
 static void wpm_status_update_cb_for_sync(struct wpm_status_state state) {
@@ -240,7 +239,7 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);    widget_battery_status_init();
     widget_layer_status_init();
     widget_output_status_init();
-    widget_wpm_status_sync_init();  // Initialize WPM sync for peripheral
+    // WPM functionality moved to peripheral - no sync needed
 
 #if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_WPM)
     zmk_widget_luna_init(&luna_widget, canvas);
