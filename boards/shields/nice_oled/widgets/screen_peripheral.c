@@ -1,25 +1,10 @@
-#incl#include <zmk/battery.h>
-#include <zmk/ble.h>
-#include <zmk/display.h>
-#include <zmk/event_manager.h>r/kernel.h>
+#include <zephyr/kernel.h>
 
-#include <zephyr/logging/log    // Calculate WPM properly: count recent keypresses and convert to WPM
-    if (recent_keypresses > 0) {
-        // Basic WPM: keypresses in last minute divided by 5 (chars per word)
-        wpm_state.current_wpm = recent_keypresses / 5;
-    } else {
-        wpm_state.current_wpm = 0;
-    }>
+#include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #include <zmk/battery.h>
-#inc    // Calculate WPM properly: count recent keypresses and convert to WPM
-    if (recent_keypresses > 0) {
-        // Basic WPM: keypresses in last minute divided by 5 (chars per word)
-        wpm_state.current_wpm = recent_keypresses / 5;
-    } else {
-        wmp_state.current_wpm = 0;
-    }de <zmk/ble.h>
+#include <zmk/ble.h>
 #include <zmk/display.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/battery_state_changed.h>
