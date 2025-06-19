@@ -26,7 +26,8 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
     target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_MASTER_TEST app PRIVATE widgets/luna_dev.c)
     target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_WPM app PRIVATE widgets/luna.c)
     zephyr_library_sources(widgets/layer.c)
-    zephyr_library_sources(widgets/profile.c)    zephyr_library_sources(widgets/screen.c)
+    zephyr_library_sources(widgets/profile.c)
+    zephyr_library_sources(widgets/screen.c)
     zephyr_library_sources(widgets/wpm.c)
     
     # Central display: simple status only
@@ -40,7 +41,8 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
 
     zephyr_library_sources(assets/vim.c)
     zephyr_library_sources(assets/vip_marcos.c)
-    zephyr_library_sources(assets/pokemon.c)    zephyr_library_sources(widgets/animation.c)
+    zephyr_library_sources(assets/pokemon.c)
+    zephyr_library_sources(widgets/animation.c)
     zephyr_library_sources(widgets/screen_peripheral.c)
     
     # Peripheral display: WPM tracking using ZMK's built-in split events
