@@ -21,6 +21,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <string.h>
 
 #include "battery.h"
+#include "display_split_sync.h"
 #include "layer.h"
 #include "output.h"
 #include "profile.h"
@@ -180,10 +181,122 @@ ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
 #endif
 
 /**
- * WPM status - for sync to peripheral only (not displayed on main)
+ * WPM status - track all keypresses for sync to peripheral
  **/
 
+static struct {
+    uint32_t keypress_timestamps[50]; // Store last 50 keypress times
+    uint8_t keypress_count;
+    uint32_t last_sync_time;
+    uint16_t current_wpm;
+} central_wpm_state = {0};
+
+static void calculate_central_wpm(void) {
+    uint32_t now = k_uptime_get_32();
+    uint32_t time_window = 60000; // 1 minute window
+    
+    // Count keypresses in the last minute
+    uint8_t recent_keypresses = 0;
+    for (int i = 0; i < central_wpm_state.keypress_count && i < 50; i++) {
+        if (now - central_wpm_state.keypress_timestamps[i] <= time_window) {
+            recent_keypresses++;
+        }
+    }
+    
+    // Calculate WPM: (keypresses per minute) / 5 (avg chars per word)
+    if (recent_keypresses > 0) {
+        central_wpm_state.current_wpm = recent_keypresses / 5;
+        
+        // For better responsiveness, also consider a shorter 15-second window
+        uint8_t recent_15s = 0;
+        uint32_t short_window = 15000; // 15 seconds
+        for (int i = 0; i < central_wpm_state.keypress_count && i < 50; i++) {
+            if (now - central_wpm_state.keypress_timestamps[i] <= short_window) {
+                recent_15s++;
+            }
+        }
+        
+        // Calculate 15-second WPM (extrapolated to per minute)
+        if (recent_15s > 0) {
+            uint16_t short_wpm = (recent_15s * 4) / 5; // 15s * 4 = 60s, then /5 for words
+            // Use the higher value for more responsive display
+            if (short_wpm > central_wpm_state.current_wpm) {
+                central_wpm_state.current_wpm = short_wpm;
+            }
+        }
+        
+        // Minimum 1 WPM if there's any recent activity
+        if (central_wpm_state.current_wpm == 0 && recent_keypresses > 0) {
+            central_wpm_state.current_wpm = 1;
+        }
+    } else {
+        central_wpm_state.current_wpm = 0;
+    }
+    
+    // Cap at reasonable maximum
+    if (central_wpm_state.current_wpm > 200) {
+        central_wpm_state.current_wpm = 200;
+    }
+}
+
+static void add_central_keypress_timestamp(uint32_t timestamp) {
+    // Add keypress timestamp to our tracking
+    if (central_wpm_state.keypress_count < 50) {
+        central_wpm_state.keypress_timestamps[central_wpm_state.keypress_count] = timestamp;
+        central_wpm_state.keypress_count++;
+    } else {
+        // Shift array and add new timestamp
+        for (int i = 0; i < 49; i++) {
+            central_wpm_state.keypress_timestamps[i] = central_wpm_state.keypress_timestamps[i + 1];
+        }
+        central_wpm_state.keypress_timestamps[49] = timestamp;
+    }
+    
+    // Clean up old timestamps (older than 2 minutes) to keep calculation accurate
+    uint32_t now = k_uptime_get_32();
+    uint8_t write_index = 0;
+    for (uint8_t read_index = 0; read_index < central_wpm_state.keypress_count; read_index++) {
+        if (now - central_wpm_state.keypress_timestamps[read_index] <= 120000) { // Keep last 2 minutes
+            central_wpm_state.keypress_timestamps[write_index] = central_wpm_state.keypress_timestamps[read_index];
+            write_index++;
+        }
+    }
+    central_wpm_state.keypress_count = write_index;
+    
+    // Recalculate WPM
+    calculate_central_wpm();
+}
+
+// Listen to ALL position state changes (both central and peripheral keys)
+static int central_wpm_position_listener(const zmk_event_t *eh) {
+    struct zmk_position_state_changed *pos_ev = as_zmk_position_state_changed(eh);
+    
+    // Only count key presses (not releases)
+    if (pos_ev && pos_ev->state) {
+        uint32_t now = k_uptime_get_32();
+        add_central_keypress_timestamp(now);
+        
+        LOG_DBG("Central WPM: Keypress detected, current WPM: %d", central_wpm_state.current_wpm);
+        
+        // Send keypress notification to peripheral for its WPM calculation
+        display_split_sync_send_keypress(now);
+    }
+    
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(central_wpm_position, central_wpm_position_listener);
+ZMK_SUBSCRIPTION(central_wpm_position, zmk_position_state_changed);
+
 static void set_wpm_status_for_sync(struct zmk_widget_screen *widget, struct wpm_status_state state) {
+    // Update WPM array for sync to peripheral (not used on central display)
+    for (int i = 0; i < 9; i++) {
+        widget->state.wpm[i] = widget->state.wpm[i + 1];
+    }
+    widget->state.wpm[9] = state.wpm;
+    
+    // Note: WPM data is tracked separately for split sync but not displayed on main screen
+}
     // Update WPM array for sync to peripheral
     for (int i = 0; i < 9; i++) {
         widget->state.wpm[i] = widget->state.wpm[i + 1];
@@ -236,7 +349,12 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
 
     lv_obj_t *canvas = lv_canvas_create(widget->obj);
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);    widget_battery_status_init();
+    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
+    
+    // Initialize keypress sync for WPM tracking
+    display_split_sync_init();
+    
+    widget_battery_status_init();
     widget_layer_status_init();
     widget_output_status_init();
     // WPM functionality moved to peripheral - no sync needed

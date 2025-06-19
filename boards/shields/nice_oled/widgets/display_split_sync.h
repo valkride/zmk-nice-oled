@@ -1,53 +1,31 @@
 #pragma once
 
 #include <zephyr/kernel.h>
-#include <zmk/endpoints.h>
-
-#define DISPLAY_SYNC_WPM_DATA_SIZE 10
 
 /**
- * Custom display data structure for split sync
- * This contains all the data we want to sync from central to peripheral
+ * Simple keypress sync for WPM calculation
+ * Central sends keypress timestamps to peripheral for accurate WPM tracking
  */
-struct display_sync_data {
-    // WPM data
-    uint8_t wpm[DISPLAY_SYNC_WPM_DATA_SIZE];
-    
-    // Layer data
-    uint8_t layer_index;
-    char layer_label[16]; // Fixed size string for sync
-    
-    // Profile data
-    int active_profile_index;
-    bool active_profile_connected;
-    bool active_profile_bonded;
-    
-    // Endpoint data
-    struct zmk_endpoint_instance selected_endpoint;
-    
-    // Sync metadata
-    uint32_t sync_timestamp;
-};
 
 /**
- * Initialize display split sync system
+ * Initialize keypress sync system
  */
 int display_split_sync_init(void);
 
 /**
- * Send display data from central to peripheral
+ * Send keypress timestamp from central to peripheral
  */
-int display_split_sync_send_data(const struct display_sync_data *data);
+int display_split_sync_send_keypress(uint32_t timestamp);
 
 /**
- * Callback for when display sync data is received on peripheral
+ * Callback for when keypress data is received on peripheral
  */
-typedef void (*display_sync_received_callback_t)(const struct display_sync_data *data);
+typedef void (*keypress_sync_received_callback_t)(uint32_t timestamp);
 
 /**
- * Register callback for receiving display sync data
+ * Register callback for receiving keypress sync data
  */
-void display_split_sync_register_callback(display_sync_received_callback_t callback);
+void display_split_sync_register_keypress_callback(keypress_sync_received_callback_t callback);
 
 /**
  * Get last received sync data (for peripheral)
