@@ -96,19 +96,18 @@ static void draw_graph(lv_obj_t *canvas, const struct status_state *state) {
         points[i].y = 127 - (value * 32 / max);
         // points[i].y = 132 - (value * 32 / max);
     }
-#else
-    int max = 0;
+#else    int max = 0;
     int min = 256;
 
-    #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    for (int i = 0; i < 10; i++) {        if (state->wpm[i] > max) {
+    // Always calculate min/max for both central and peripheral
+    for (int i = 0; i < 10; i++) {
+        if (state->wpm[i] > max) {
             max = state->wpm[i];
         }
         if (state->wpm[i] < min) {
             min = state->wpm[i];
         }
     }
-    #endif
       int range = max - min;
     if (range == 0) {
         range = 1;

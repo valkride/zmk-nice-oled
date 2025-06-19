@@ -17,7 +17,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #include "animation.h"
 #include "battery.h"
-#include "display_split_sync.h"
 #include "output.h"
 #include "screen_peripheral.h"
 #include "wpm.h"
@@ -139,10 +138,38 @@ static void calculate_wpm(void) {
         if (now - wpm_state.keypress_timestamps[i] <= time_window) {
             recent_keypresses++;
         }
+    }    // More responsive WPM calculation
+    // Calculate based on actual typing rate
+    if (recent_keypresses > 0) {
+        // Improved WPM calculation: (keypresses per minute) / 5 (avg chars per word)
+        // Since we're looking at a 1-minute window, the formula is simplified
+        wpm_state.current_wpm = recent_keypresses / 5;
+        
+        // For better responsiveness, also consider a shorter 15-second window
+        uint8_t recent_15s = 0;
+        uint32_t short_window = 15000; // 15 seconds
+        for (int i = 0; i < wpm_state.keypress_count && i < 50; i++) {
+            if (now - wpm_state.keypress_timestamps[i] <= short_window) {
+                recent_15s++;
+            }
+        }
+        
+        // Calculate 15-second WPM (extrapolated to per minute)
+        if (recent_15s > 0) {
+            uint16_t short_wpm = (recent_15s * 4) / 5; // 15s * 4 = 60s, then /5 for words
+            // Use the higher value for more responsive display
+            if (short_wpm > wpm_state.current_wpm) {
+                wpm_state.current_wpm = short_wpm;
+            }
+        }
+        
+        // Minimum 1 WPM if there's any recent activity
+        if (wpm_state.current_wpm == 0 && recent_keypresses > 0) {
+            wpm_state.current_wpm = 1;
+        }
+    } else {
+        wpm_state.current_wpm = 0;
     }
-    
-    // Calculate WPM (assuming average 5 characters per word)
-    wpm_state.current_wpm = (recent_keypresses * 60) / 5;
     
     // Cap at reasonable maximum
     if (wpm_state.current_wpm > 200) {
@@ -178,27 +205,24 @@ static void add_keypress_timestamp(uint32_t timestamp) {
         wpm_state.keypress_timestamps[49] = timestamp;
     }
     
+    // Clean up old timestamps (older than 2 minutes) to keep calculation accurate
+    uint32_t now = k_uptime_get_32();
+    uint8_t write_index = 0;
+    for (uint8_t read_index = 0; read_index < wpm_state.keypress_count; read_index++) {
+        if (now - wpm_state.keypress_timestamps[read_index] <= 120000) { // Keep last 2 minutes
+            wpm_state.keypress_timestamps[write_index] = wpm_state.keypress_timestamps[read_index];
+            write_index++;
+        }
+    }
+    wpm_state.keypress_count = write_index;
+    
     // Recalculate WPM
     calculate_wpm();
 }
 
-// Callback to receive keypress data from central via split sync
-static void central_keypress_received(const struct display_sync_data *sync_data) {
-    if (!sync_data) {
-        return;
-    }
-    
-    // If sync data contains a keypress timestamp, add it to our tracking
-    if (sync_data->sync_timestamp > wpm_state.last_update_time) {
-        add_keypress_timestamp(sync_data->sync_timestamp);
-        
-        uint32_t now = k_uptime_get_32();
-        if (now - wpm_state.last_update_time > 500) { // Update display
-            update_wpm_display();
-            wpm_state.last_update_time = now;
-        }
-    }
-}
+// Callback to receive keypress data from central via split sync - REMOVED
+// ZMK's split system already provides all keypress events to the peripheral
+// via the standard zmk_position_state_changed event system
 
 static int wpm_position_listener(const zmk_event_t *eh) {
     struct zmk_position_state_changed *pos_ev = as_zmk_position_state_changed(eh);
@@ -221,9 +245,8 @@ static int wpm_position_listener(const zmk_event_t *eh) {
         
         // Recalculate WPM
         calculate_wpm();
-        
-        // Update display if enough time has passed
-        if (now - wpm_state.last_update_time > 1000) { // Update at most once per second
+          // Update display if enough time has passed
+        if (now - wpm_state.last_update_time > 500) { // Update every 500ms for better responsiveness
             update_wpm_display();
             wpm_state.last_update_time = now;
         }
@@ -236,37 +259,10 @@ ZMK_LISTENER(wpm_position, wpm_position_listener);
 ZMK_SUBSCRIPTION(wpm_position, zmk_position_state_changed);
 
 /**
- * Simple WPM display with static data for peripheral
+ * Real-time WPM display - simulation timer removed
  **/
 
-static struct k_work_delayable wpm_work;
-
-static void wpm_work_handler(struct k_work *work) {
-    // Very lightweight WPM simulation for peripheral display
-    static uint8_t counter = 0;
-    
-    struct zmk_widget_screen *widget;
-    SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {        // Real WPM tracking - no more simulation
-        // counter = (counter + 1) % 60;
-        
-        // No more fake data - WPM is now calculated from real keypresses
-        // for (int i = 0; i < 9; i++) {
-        //     widget->state.wpm[i] = widget->state.wpm[i + 1];
-        // }
-        
-        // Remove simulation pattern
-        // widget->state.wpm[9] = (counter % 20) + 10; // Values between 10-30
-        
-        // update_display(); // Display updates handled by real keypress events
-    }
-      // Schedule next update
-    k_work_schedule(&wpm_work, K_SECONDS(5));
-}
-
-static void init_wpm_timer(void) {
-    k_work_init_delayable(&wpm_work, wpm_work_handler);
-    k_work_schedule(&wpm_work, K_SECONDS(5)); // Start after 5 seconds
-}
+// Old simulation timer removed - WPM now entirely based on real keypresses
 
 /**
  * Initialization
@@ -283,15 +279,14 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     // draw_animation(canvas, widget);    // Initialize local status tracking
     widget_battery_status_init();
     widget_peripheral_status_init();
-    
-    // Initialize WPM data to zero
+      // Initialize WPM data to zero
     for (int i = 0; i < 10; i++) {
         widget->state.wpm[i] = 0;
-    }    // Timer disabled - real WPM tracking now handles updates  
-    // init_wmp_timer();
-      // Register for split sync to receive keypress data from central
-    display_split_sync_register_callback(central_keypress_received);
-    display_split_sync_init();  // Enable split sync system
+    }
+      // Real WPM tracking now handles all updates - no simulation timer needed
+    
+    // ZMK's split system already forwards all keypresses to peripheral
+    // No additional sync system needed
 
     return 0;
 }

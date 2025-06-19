@@ -21,7 +21,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <string.h>
 
 #include "battery.h"
-#include "display_split_sync.h"
 #include "layer.h"
 #include "output.h"
 #include "profile.h"
@@ -222,32 +221,11 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status_sync, struct wpm_status_state,
 ZMK_SUBSCRIPTION(widget_wpm_status_sync, zmk_wpm_state_changed);
 
 /**
- * Keypress sync for WPM tracking on peripheral
- **/
-
-static int central_keypress_listener(const zmk_event_t *eh) {
-    struct zmk_position_state_changed *pos_ev = as_zmk_position_state_changed(eh);
-    
-    // Only count key presses (not releases) from central side
-    if (pos_ev && pos_ev->state) {
-        struct display_sync_data sync_data = {0};
-        sync_data.sync_timestamp = k_uptime_get_32();  // Use current time as keypress indicator
-        
-        // Send keypress notification to peripheral
-        display_split_sync_send_data(&sync_data);
-    }
-    
-    return ZMK_EV_EVENT_BUBBLE;
-}
-
-ZMK_LISTENER(central_keypress, central_keypress_listener);
-ZMK_SUBSCRIPTION(central_keypress, zmk_position_state_changed);
-
-/**
  * WPM status - REMOVED from main display (now handled by peripheral)
  **/
 
 // WPM functionality moved to peripheral display in screen_peripheral.c
+// ZMK's split system automatically forwards all keypresses to the peripheral
 
 /**
  * Initialization
@@ -263,7 +241,6 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     widget_layer_status_init();
     widget_output_status_init();
     widget_wpm_status_sync_init();  // Initialize WPM sync for peripheral
-    display_split_sync_init();      // Initialize split sync system
 
 #if IS_ENABLED(CONFIG_NICE_OLED_WIDGET_WPM)
     zmk_widget_luna_init(&luna_widget, canvas);
