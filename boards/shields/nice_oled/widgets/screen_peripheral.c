@@ -231,32 +231,6 @@ static void peripheral_wpm_received(uint16_t wpm) {
     // Update display
     update_wpm_display();
 }
-    // Add keypress timestamp to our tracking
-    if (wpm_state.keypress_count < 50) {
-        wpm_state.keypress_timestamps[wpm_state.keypress_count] = timestamp;
-        wpm_state.keypress_count++;
-    } else {
-        // Shift array and add new timestamp
-        for (int i = 0; i < 49; i++) {
-            wpm_state.keypress_timestamps[i] = wpm_state.keypress_timestamps[i + 1];
-        }
-        wpm_state.keypress_timestamps[49] = timestamp;
-    }
-    
-    // Clean up old timestamps (older than 2 minutes) to keep calculation accurate
-    uint32_t now = k_uptime_get_32();
-    uint8_t write_index = 0;
-    for (uint8_t read_index = 0; read_index < wpm_state.keypress_count; read_index++) {
-        if (now - wpm_state.keypress_timestamps[read_index] <= 120000) { // Keep last 2 minutes
-            wpm_state.keypress_timestamps[write_index] = wpm_state.keypress_timestamps[read_index];
-            write_index++;
-        }
-    }
-    wpm_state.keypress_count = write_index;
-    
-    // Recalculate WPM
-    calculate_wpm();
-}
 
 // Callback to receive keypress data from central via split sync - REMOVED
 // ZMK's split system already provides all keypress events to the peripheral

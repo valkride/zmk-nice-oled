@@ -27,28 +27,5 @@ struct status_state* extended_to_status_state(struct peripheral_extended_status_
         converted_state.selected_endpoint = ext_state->selected_endpoint;
     }
     #endif
-    
-    return &converted_state;
-}
-
-void update_extended_state_with_sync(struct peripheral_extended_status_state* ext_state, 
-                                   const struct display_sync_data* sync_data) {
-    if (!ext_state || !sync_data) {
-        return;
-    }
-    
-    // Update synced data
-    memcpy(ext_state->wpm, sync_data->wpm, sizeof(ext_state->wpm));
-    ext_state->layer_index = sync_data->layer_index;
-    strncpy(ext_state->layer_label, sync_data->layer_label, sizeof(ext_state->layer_label) - 1);
-    ext_state->layer_label[sizeof(ext_state->layer_label) - 1] = '\0';
-    
-    ext_state->active_profile_index = sync_data->active_profile_index;
-    ext_state->active_profile_connected = sync_data->active_profile_connected;
-    ext_state->active_profile_bonded = sync_data->active_profile_bonded;
-    ext_state->selected_endpoint = sync_data->selected_endpoint;
-    
-    // Update sync status
-    ext_state->sync_active = true;
-    ext_state->last_sync_time = sync_data->sync_timestamp;
+      return &converted_state;
 }

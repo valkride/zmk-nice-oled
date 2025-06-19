@@ -26,8 +26,3 @@ typedef void (*wpm_sync_received_callback_t)(uint16_t wpm);
  * Register callback for receiving WPM sync data
  */
 void display_split_sync_register_wpm_callback(wpm_sync_received_callback_t callback);
-
-/**
- * Get last received sync data (for peripheral)
- */
-const struct display_sync_data* display_split_sync_get_last_data(void);
