@@ -221,17 +221,15 @@ static void add_keypress_timestamp(uint32_t timestamp) {
     calculate_wpm();
 }
 
-// Callback to receive keypress data from central
-static void peripheral_keypress_received(uint32_t timestamp) {
-    LOG_DBG("Peripheral: Received keypress from central at %u", timestamp);
-    add_keypress_timestamp(timestamp);
+// Callback to receive WPM data from central
+static void peripheral_wpm_received(uint16_t wpm) {
+    LOG_DBG("Peripheral: Received WPM from central: %d", wpm);
     
-    // Update display if enough time has passed
-    uint32_t now = k_uptime_get_32();
-    if (now - wpm_state.last_update_time > 500) { // Update every 500ms for better responsiveness
-        update_wpm_display();
-        wpm_state.last_update_time = now;
-    }
+    // Update our current WPM and display
+    wpm_state.current_wpm = wpm;
+    
+    // Update display
+    update_wpm_display();
 }
     // Add keypress timestamp to our tracking
     if (wpm_state.keypress_count < 50) {
@@ -321,16 +319,12 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     widget_peripheral_status_init();    // Initialize WPM data to zero
     for (int i = 0; i < 10; i++) {
         widget->state.wpm[i] = 0;
-    }
-    
-    // Initialize keypress sync and register callback to receive data from central
+    }    // Initialize keypress sync and register callback to receive WPM data from central
     display_split_sync_init();
-    display_split_sync_register_keypress_callback(peripheral_keypress_received);
-      
-    // Real WPM tracking now handles all updates - no simulation timer needed
+    display_split_sync_register_wpm_callback(peripheral_wpm_received);
+    // Real WPM tracking now handles local keypress updates, plus receives WPM sync from central
     
-    // ZMK's split system already forwards all keypresses to peripheral
-    // Now also receives keypress data from central via split sync
+    // Now receives both local keypress events AND WPM sync data from central
 
     return 0;
 }

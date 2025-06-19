@@ -3,29 +3,29 @@
 #include <zephyr/kernel.h>
 
 /**
- * Simple keypress sync for WPM calculation
- * Central sends keypress timestamps to peripheral for accurate WPM tracking
+ * WPM sync for split keyboard
+ * Central calculates WPM for all keys and sends the value to peripheral
  */
 
 /**
- * Initialize keypress sync system
+ * Initialize WPM sync system
  */
 int display_split_sync_init(void);
 
 /**
- * Send keypress timestamp from central to peripheral
+ * Send current WPM value from central to peripheral
  */
-int display_split_sync_send_keypress(uint32_t timestamp);
+int display_split_sync_send_wpm(uint16_t wpm);
 
 /**
- * Callback for when keypress data is received on peripheral
+ * Callback for when WPM data is received on peripheral
  */
-typedef void (*keypress_sync_received_callback_t)(uint32_t timestamp);
+typedef void (*wpm_sync_received_callback_t)(uint16_t wpm);
 
 /**
- * Register callback for receiving keypress sync data
+ * Register callback for receiving WPM sync data
  */
-void display_split_sync_register_keypress_callback(keypress_sync_received_callback_t callback);
+void display_split_sync_register_wpm_callback(wpm_sync_received_callback_t callback);
 
 /**
  * Get last received sync data (for peripheral)

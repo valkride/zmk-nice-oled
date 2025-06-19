@@ -277,9 +277,8 @@ static int central_wpm_position_listener(const zmk_event_t *eh) {
         add_central_keypress_timestamp(now);
         
         LOG_DBG("Central WPM: Keypress detected, current WPM: %d", central_wpm_state.current_wpm);
-        
-        // Send keypress notification to peripheral for its WPM calculation
-        display_split_sync_send_keypress(now);
+          // Send current WPM value to peripheral
+        display_split_sync_send_wpm(central_wpm_state.current_wpm);
     }
     
     return ZMK_EV_EVENT_BUBBLE;
