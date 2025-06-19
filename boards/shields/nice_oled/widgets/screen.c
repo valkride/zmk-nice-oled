@@ -206,6 +206,7 @@ static void set_wpm_status_for_sync(struct zmk_widget_screen *widget, struct wpm
     // Note: WPM sync functionality removed - peripheral handles WPM independently
 }
 
+/*
 static void wpm_status_update_cb_for_sync(struct wpm_status_state state) {
     struct zmk_widget_screen *widget;
     SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_wpm_status_for_sync(widget, state); }
@@ -214,10 +215,9 @@ static void wpm_status_update_cb_for_sync(struct wpm_status_state state) {
 static struct wpm_status_state wpm_status_get_state_for_sync(const zmk_event_t *eh) {
     return (struct wpm_status_state){.wpm = zmk_wpm_get_state()};
 }
+*/
 
-ZMK_DISPLAY_WIDGET_LISTENER(widget_wpm_status_sync, struct wpm_status_state, 
-                            wpm_status_update_cb_for_sync, wpm_status_get_state_for_sync);
-ZMK_SUBSCRIPTION(widget_wpm_status_sync, zmk_wpm_state_changed);
+// WPM status listener removed - functionality moved to peripheral
 
 /**
  * WPM status - REMOVED from main display (now handled by peripheral)
