@@ -30,9 +30,3 @@ struct peripheral_extended_status_state {
  * Convert extended state to regular status_state for drawing functions
  */
 struct status_state* extended_to_status_state(struct peripheral_extended_status_state* ext_state);
-
-/**
- * Update extended state with sync data
- */
-void update_extended_state_with_sync(struct peripheral_extended_status_state* ext_state, 
-                                   const struct display_sync_data* sync_data);

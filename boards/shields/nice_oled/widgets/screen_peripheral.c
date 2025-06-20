@@ -11,7 +11,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/events/usb_conn_state_changed.h>
 #include <zmk/events/position_state_changed.h>
-#include <zmk/events/keymap_state_changed.h>
 #include <zmk/split/bluetooth/peripheral.h>
 #include <zmk/usb.h>
 #include <string.h>
@@ -120,56 +119,7 @@ ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_s
 ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
 
 /**
- * WPM tracking - listen to ALL keymap events (should include both sides)
- **/
-
-// Listen to keymap state changes which should include both central and peripheral
-static int peripheral_keymap_listener(const zmk_event_t *eh) {
-    struct zmk_keymap_state_changed *ev = as_zmk_keymap_state_changed(eh);
-    if (ev == NULL) {
-        return ZMK_EV_EVENT_BUBBLE;
-    }    // Count any key press activity for WPM
-    uint32_t now = k_uptime_get_32();
-    
-    LOG_DBG("Peripheral: Keymap event detected for WPM tracking");
-    
-    // Add keypress timestamp
-    if (wpm_state.keypress_count < 50) {
-        wpm_state.keypress_timestamps[wpm_state.keypress_count] = now;
-        wpm_state.keypress_count++;
-    } else {
-        // Shift array and add new timestamp
-        for (int i = 0; i < 49; i++) {
-            wpm_state.keypress_timestamps[i] = wpm_state.keypress_timestamps[i + 1];
-        }
-        wpm_state.keypress_timestamps[49] = now;
-    }
-    
-    // Recalculate WPM
-    calculate_wpm();
-    
-    // Update WPM buffer for graph
-    static int buffer_update_counter = 0;
-    if (buffer_update_counter++ % 3 == 0) { // Update buffer every 3 keypresses        for (int i = 9; i > 0; i--) {
-            wpm_state.wpm_buffer[i] = wpm_state.wpm_buffer[i-1];
-        }
-        wpm_state.wpm_buffer[0] = wpm_state.current_wpm;
-    }
-    
-    // Update display if enough time has passed
-    if (now - wpm_state.last_update_time > 500) { // Update every 500ms for better responsiveness
-        update_wpm_display();
-        wpm_state.last_update_time = now;
-    }
-
-    return ZMK_EV_EVENT_BUBBLE;
-}
-
-ZMK_LISTENER(peripheral_keymap, peripheral_keymap_listener);
-ZMK_SUBSCRIPTION(peripheral_keymap, zmk_keymap_state_changed);
-
-/**
- * Position state tracking (local keys only - for debugging)
+ * WPM tracking - position state events and timer-based updates
  **/
 
 static struct {
