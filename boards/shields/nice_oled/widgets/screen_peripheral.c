@@ -3,9 +3,19 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-#include <zmk/battery.h>
-#include <zmk/ble.h>
-#include <zmk/display.h>
+#include <zmk/battery.h    // Count keypresses in the last minute
+    uint8_t recent_keypresses = 0;
+    for (int i = 0; i < wpm_state.keypress_count && i < 50; i++) {
+        if (now - wpm_state.keypress_timestamps[i] <= time_window) {
+            recent_keypresses++;
+        }
+    }
+    
+    LOG_DBG("WPM Calc: Total keypresses in buffer: %d, Recent keypresses: %d", 
+            wpm_state.keypress_count, recent_keypresses);
+    
+    // More responsive WPM calculationlude <zmk/ble.h>
+#in            wpm_state.current_wpm = (short_wpm > base_wpm) ? short_wpm : base_wpm;lude <zmk/display.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
@@ -143,26 +153,27 @@ static void calculate_wpm(void) {
     }    // More responsive WPM calculation
     // Calculate based on actual typing rate
     if (recent_keypresses > 0) {
-        // Improved WPM calculation: (keypresses per minute) / 5 (avg chars per word)
-        // Since we're looking at a 1-minute window, the formula is simplified
-        wpm_state.current_wpm = recent_keypresses / 5;
+        // Basic WPM calculation: (keypresses per minute) / 5 (avg chars per word)
+        uint16_t base_wpm = recent_keypresses / 5;
+        if (base_wpm == 0 && recent_keypresses > 0) {
+            base_wpm = 1; // Minimum 1 WPM if there's any activity
+        }
         
-        // For better responsiveness, also consider a shorter 15-second window
-        uint8_t recent_15s = 0;
-        uint32_t short_window = 15000; // 15 seconds
+        // For better responsiveness, also consider a shorter 10-second window
+        uint8_t recent_10s = 0;
+        uint32_t short_window = 10000; // 10 seconds
         for (int i = 0; i < wpm_state.keypress_count && i < 50; i++) {
             if (now - wpm_state.keypress_timestamps[i] <= short_window) {
-                recent_15s++;
+                recent_10s++;
             }
         }
         
-        // Calculate 15-second WPM (extrapolated to per minute)
-        if (recent_15s > 0) {
-            uint16_t short_wpm = (recent_15s * 4) / 5; // 15s * 4 = 60s, then /5 for words
-            // Use the higher value for more responsive display
-            if (short_wpm > wpm_state.current_wpm) {
-                wpm_state.current_wpm = short_wpm;
-            }
+        // Calculate 10-second WPM (extrapolated to per minute)
+        if (recent_10s > 0) {
+            uint16_t short_wpm = (recent_10s * 6) / 5; // 10s * 6 = 60s, then /5 for words
+            // Use the higher value for more responsive display, but cap it reasonably
+            wpm_state.current_wpm = (short_wpm > base_wpm) ? short_wpm : base_wpm;        } else {
+            wpm_state.current_wpm = base_wpm;
         }
         
         // Minimum 1 WPM if there's any recent activity
@@ -257,10 +268,18 @@ static void wpm_update_work_handler(struct k_work *work) {
 
 static int wpm_position_listener(const zmk_event_t *eh) {
     struct zmk_position_state_changed *pos_ev = as_zmk_position_state_changed(eh);
-    
-    // Only count key presses (not releases)
+      // Only count key presses (not releases)
     if (pos_ev && pos_ev->state) {
         uint32_t now = k_uptime_get_32();
+        
+        // Debouncing: ignore keypresses that are too close together (less than 50ms apart)
+        static uint32_t last_keypress_time = 0;
+        if (now - last_keypress_time < 50) {
+            return ZMK_EV_EVENT_BUBBLE; // Ignore this keypress
+        }
+        last_keypress_time = now;
+        
+        LOG_DBG("Peripheral: Valid keypress detected at position %d", pos_ev->position);
         
         // Add keypress timestamp
         if (wpm_state.keypress_count < 50) {
@@ -272,13 +291,18 @@ static int wpm_position_listener(const zmk_event_t *eh) {
                 wpm_state.keypress_timestamps[i] = wpm_state.keypress_timestamps[i + 1];
             }
             wpm_state.keypress_timestamps[49] = now;
-        }
-          // Recalculate WPM
+        }        // Recalculate WPM
         calculate_wpm();
+        
+        LOG_DBG("Peripheral: After keypress - Count: %d, Current WPM: %d", 
+                wpm_state.keypress_count, wpm_state.current_wpm);
+        
+        // Force immediate display update after keypress
+        update_wpm_display();
         
         // Update WPM buffer for graph
         static int buffer_update_counter = 0;
-        if (buffer_update_counter++ % 5 == 0) { // Update buffer every 5 keypresses
+        if (buffer_update_counter++ % 3 == 0) { // Update buffer every 3 keypresses
             for (int i = 9; i > 0; i--) {
                 wpm_state.wpm_buffer[i] = wpm_state.wpm_buffer[i-1];
             }
