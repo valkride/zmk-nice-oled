@@ -261,10 +261,19 @@ static int wpm_position_listener(const zmk_event_t *eh) {
             }
             wpm_state.keypress_timestamps[49] = now;
         }
-        
-        // Recalculate WPM
+          // Recalculate WPM
         calculate_wpm();
-          // Update display if enough time has passed
+        
+        // Update WPM buffer for graph
+        static int buffer_update_counter = 0;
+        if (buffer_update_counter++ % 5 == 0) { // Update buffer every 5 keypresses
+            for (int i = 9; i > 0; i--) {
+                wpm_state.wpm_buffer[i] = wpm_state.wpm_buffer[i-1];
+            }
+            wpm_state.wpm_buffer[0] = wpm_state.current_wpm;
+        }
+        
+        // Update display if enough time has passed
         if (now - wpm_state.last_update_time > 500) { // Update every 500ms for better responsiveness
             update_wpm_display();
             wpm_state.last_update_time = now;

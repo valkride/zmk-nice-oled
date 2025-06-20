@@ -270,14 +270,17 @@ static void add_central_keypress_timestamp(uint32_t timestamp) {
 // Listen to ALL position state changes (both central and peripheral keys)
 static int central_wpm_position_listener(const zmk_event_t *eh) {
     struct zmk_position_state_changed *pos_ev = as_zmk_position_state_changed(eh);
-    
-    // Only count key presses (not releases)
+      // Only count key presses (not releases)
     if (pos_ev && pos_ev->state) {
         uint32_t now = k_uptime_get_32();
         add_central_keypress_timestamp(now);
         
+        // Recalculate WPM after adding keypress
+        calculate_central_wpm();
+        
         LOG_DBG("Central WPM: Keypress detected, current WPM: %d", central_wpm_state.current_wpm);
-          // Send current WPM value to peripheral
+        
+        // Send current WPM value to peripheral
         display_split_sync_send_wpm(central_wpm_state.current_wpm);
     }
     
