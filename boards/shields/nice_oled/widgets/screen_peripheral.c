@@ -42,19 +42,13 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
 static struct battery_status_state get_state(const zmk_event_t *_eh) {
     return (struct battery_status_state) {
         .level = zmk_battery_state_of_charge(),
-#if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
-        .usb_present = zmk_usb_is_powered(),
-#endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
+        // Note: peripheral doesn't track USB state in status_state
     };
 }
 
 static void set_battery_symbol(struct zmk_widget_screen *widget, struct battery_status_state state) {
     widget->state.battery = state.level;
-
-#if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
-    widget->state.usb_present = state.usb_present;
-#endif /* IS_ENABLED(CONFIG_USB_DEVICE_STACK) */
-
+    // Note: peripheral status_state doesn't have usb_present field
     draw_canvas(widget->obj, widget->cbuf, &widget->state);
 }
 
