@@ -49,7 +49,7 @@ static struct battery_status_state get_state(const zmk_event_t *_eh) {
 }
 
 static void set_battery_symbol(struct zmk_widget_screen *widget, struct battery_status_state state) {
-    widget->state.bat_pct = state.level;
+    widget->state.battery = state.level;
 
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
     widget->state.usb_present = state.usb_present;
