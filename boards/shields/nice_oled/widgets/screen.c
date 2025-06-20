@@ -277,11 +277,15 @@ static int central_wpm_position_listener(const zmk_event_t *eh) {
         
         // Recalculate WPM after adding keypress
         calculate_central_wpm();
+          LOG_DBG("Central WPM: Keypress detected, current WPM: %d", central_wpm_state.current_wpm);
         
-        LOG_DBG("Central WPM: Keypress detected, current WPM: %d", central_wpm_state.current_wpm);
-        
-        // Send current WPM value to peripheral
+        // Send current WPM value to peripheral immediately
         display_split_sync_send_wpm(central_wpm_state.current_wpm);
+        
+        // Also trigger a delayed sync to ensure peripheral receives the data
+        static struct k_work_delayable delayed_sync;
+        k_work_init_delayable(&delayed_sync, NULL);
+        k_work_schedule(&delayed_sync, K_MSEC(100));
     }
     
     return ZMK_EV_EVENT_BUBBLE;
