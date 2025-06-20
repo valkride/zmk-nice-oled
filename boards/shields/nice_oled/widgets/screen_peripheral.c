@@ -3,19 +3,9 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-#include <zmk/battery.h    // Count keypresses in the last minute
-    uint8_t recent_keypresses = 0;
-    for (int i = 0; i < wpm_state.keypress_count && i < 50; i++) {
-        if (now - wpm_state.keypress_timestamps[i] <= time_window) {
-            recent_keypresses++;
-        }
-    }
-    
-    LOG_DBG("WPM Calc: Total keypresses in buffer: %d, Recent keypresses: %d", 
-            wpm_state.keypress_count, recent_keypresses);
-    
-    // More responsive WPM calculationlude <zmk/ble.h>
-#in            wpm_state.current_wpm = (short_wpm > base_wpm) ? short_wpm : base_wpm;lude <zmk/display.h>
+#include <zmk/battery.h>
+#include <zmk/ble.h>
+#include <zmk/display.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
