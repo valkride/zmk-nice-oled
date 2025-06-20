@@ -127,6 +127,7 @@ static struct {
     uint8_t keypress_count;
     uint32_t last_update_time;
     uint16_t current_wpm;
+    uint16_t wpm_buffer[10]; // Buffer for graph display
 } wpm_state = {0};
 
 static void calculate_wpm(void) {
@@ -225,8 +226,14 @@ static void add_keypress_timestamp(uint32_t timestamp) {
 static void peripheral_wpm_received(uint16_t wpm) {
     LOG_DBG("Peripheral: Received WPM from central: %d", wpm);
     
-    // Update our current WPM and display
+    // Update our current WPM and WPM buffer for graphing
     wpm_state.current_wpm = wpm;
+    
+    // Update WPM buffer for graph (shift and add new value)
+    for (int i = 9; i > 0; i--) {
+        wpm_state.wpm_buffer[i] = wpm_state.wpm_buffer[i-1];
+    }
+    wpm_state.wpm_buffer[0] = wpm;
     
     // Update display
     update_wpm_display();
