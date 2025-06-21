@@ -1,7 +1,6 @@
 #pragma once
 
 #include "util.h"
-#include "display_split_sync.h"
 
 /**
  * Extended status state for peripheral that includes synced data
