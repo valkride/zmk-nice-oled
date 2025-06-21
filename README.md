@@ -50,7 +50,7 @@ General characteristics:
 # Quick Installation
 > [!TIP]
 >
-> All widgets are enabled `hid`,` modifiers`, `wpm` etc., if you want to
+> All widgets are enabled `hid`,` modifiers`, etc., if you want to
 > disable them, look at the configuration section
 
 Installation in 4 simple steps:
@@ -138,13 +138,8 @@ Modify the behavior of this shield by adjusting these options in your personal c
 
 | Option                                                           | Type | Description                                                                                                                                                                                                                                                       | Default |
 | ------------------------------------------                       | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `CONFIG_NICE_OLED_GRAPH_AND_NEEDLE_WPM_FIXED_RANGE`                 | bool | This shield uses a fixed range for the chart and gauge deflection. If you set this option to `n`, it will switch to a dynamic range, like the default nice!view shield, which dynamically adjusts based on the last 10 WPM values provided by ZMK.                | y       |
-| `CONFIG_NICE_OLED_GRAPH_AND_NEEDLE_WPM_FIXED_RANGE_MAX`             | int  | You can adjust the maximum value of the fixed range to align with your current goal.                                                                                                                                                                              | 100     |
 | `CONFIG_NICE_OLED_GEM_ANIMATION`                                 | bool | If you find the animation distracting (or want to save on battery usage), you can turn it off by setting this option to `n`. It will instead pick a random frame of the animation every time you restart your keyboard.                                           | y       |
 | `CONFIG_NICE_OLED_GEM_ANIMATION_MS`                              | int  | Alternatively, you can slow down the animation. A high value, such as 96000, slows the animation considerably, showing the next frame every couple of seconds. The animation consists of 16 frames, and the default value of 960 milliseconds plays it at 60 fps. | 960     |
-| `CONFIG_NICE_OLED_WIDGET_WPM`                                    | bool | Enables the Words Per Minute (WPM) widget on the OLED display.                                                                                                                                                                                                    | y       |
-| `CONFIG_NICE_OLED_WIDGET_WPM_LUNA`                               | bool | Activates the Luna animation for the WPM widget.                                                                                                                                                                                                                  | y       |
-| `CONFIG_NICE_OLED_WIDGET_WPM_LUNA_ANIMATION_MS`                  | int  | Sets the duration of the Luna animation for the WPM widget (in milliseconds).                                                                                                                                                                                     | 300     |
 | `CONFIG_NICE_OLED_WIDGET_HID_INDICATORS`                         | bool | Enables the Human Interface Device (HID) indicators widget.                                                                                                                                                                                                       | y       |
 | `CONFIG_NICE_OLED_WIDGET_HID_INDICATORS_LUNA`                    | bool | Activates the Luna animation for the HID indicators widget.                                                                                                                                                                                                       | y       |
 | `CONFIG_NICE_OLED_WIDGET_HID_INDICATORS_LUNA_ONLY_CAPSLOCK`      | bool | Activates the Luna animation for the HID indicators widget [ONLY for CapsLock ](https://zmk.dev/docs/keymaps/list-of-keycodes#locks)                                                                                                                  | n       |
@@ -156,8 +151,6 @@ Modify the behavior of this shield by adjusting these options in your personal c
 
 You can deactivate luna the dog as follows (default is activated):
 ```conf
-CONFIG_NICE_OLED_WIDGET_WPM=n
-CONFIG_NICE_OLED_WIDGET_WPM_LUNA=n
 CONFIG_NICE_OLED_WIDGET_HID_INDICATORS=n
 CONFIG_NICE_OLED_WIDGET_HID_INDICATORS_LUNA=n
 CONFIG_NICE_OLED_WIDGET_MODIFIERS_INDICATORS=n

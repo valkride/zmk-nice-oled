@@ -17,10 +17,8 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #include "animation.h"
 #include "battery.h"
-#include "display_split_sync.h"
 #include "output.h"
 #include "screen_peripheral.h"
-#include "wpm.h"
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void update_display(void);
@@ -34,20 +32,17 @@ static void update_display(void);
  **/
 
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
-    lv_obj_t *canvas = lv_obj_get_child(widget, 0);
-
-    // Peripheral (left) display: Show WPM meter as requested
+    lv_obj_t *canvas = lv_obj_get_child(widget, 0);    // Peripheral (left) display: Simple status display
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
-    draw_wpm_status(canvas, state);
 }
 
 /**
- * Animation timer - REMOVED for real WPM tracking
+ * Animation timer - No longer needed
  **/
 
-// Timer and animation code removed - WPM now tracks real keypresses
+// Animation code for peripheral display
 
 /**
  * Update procedures

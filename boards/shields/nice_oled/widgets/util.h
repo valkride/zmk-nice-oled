@@ -16,18 +16,15 @@
 struct status_state {
   uint8_t battery;
   bool charging;
-#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-  struct zmk_endpoint_instance selected_endpoint;
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)  struct zmk_endpoint_instance selected_endpoint;
   int active_profile_index;
   bool active_profile_connected;
   bool active_profile_bonded;
   uint8_t layer_index;
   const char *layer_label;
-  uint8_t wpm[10];
   uint8_t mod_state;
 #else
   bool connected;
-  uint8_t wpm[10];  // Add WPM support for peripheral displays
 #endif
 };
 

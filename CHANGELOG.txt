@@ -36,4 +36,3 @@ https://github.com/mctechnology17/zmk-nice-oled/blob/main/CHANGELOG.txt
 - [ ] granular configuration to deactivate each widget (in progress)
 - [ ] load animation (in progress)
 - [ ] Responsive Bongocat per key (in progress)
-- [ ] Responsive Bongocat wpm (in progress)

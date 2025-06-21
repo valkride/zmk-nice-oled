@@ -14,11 +14,9 @@ struct status_state* extended_to_status_state(struct peripheral_extended_status_
     
     // For peripheral builds, the status_state only has battery, charging, and connected fields
     #if IS_ENABLED(CONFIG_ZMK_SPLIT) && !IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    converted_state.connected = ext_state->connected;
-    #else
+    converted_state.connected = ext_state->connected;    #else
     // For central builds, copy synced data if available
     if (ext_state->sync_active) {
-        memcpy(converted_state.wpm, ext_state->wpm, sizeof(converted_state.wpm));
         converted_state.layer_index = ext_state->layer_index;
         converted_state.layer_label = ext_state->layer_label;
         converted_state.active_profile_index = ext_state->active_profile_index;

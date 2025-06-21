@@ -6,14 +6,12 @@
 /**
  * Extended status state for peripheral that includes synced data
  */
-struct peripheral_extended_status_state {
-    // Original peripheral data
+struct peripheral_extended_status_state {    // Original peripheral data
     uint8_t battery;
     bool charging;
     bool connected;
     
     // Synced data from central
-    uint8_t wpm[10];
     uint8_t layer_index;
     char layer_label[16];
     int active_profile_index;

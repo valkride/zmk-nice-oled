@@ -17,7 +17,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "battery.h"
 #include "output.h"
 #include "screen_peripheral.h"
-#include "wpm.h"
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
@@ -28,11 +27,10 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
 
-    // Draw widgets - peripheral display shows WPM
+    // Draw standard peripheral widgets
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
-    draw_wpm_status(canvas, state);
 }
 
 /**
