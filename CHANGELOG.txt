@@ -4,7 +4,7 @@ https://github.com/mctechnology17/zmk-nice-oled/blob/main/CHANGELOG.txt
 # FEATURES 0.0.1-beta1 (Mar 24, 2025)
 =======================================
 + NEW FEATURES
-- [x] COMMIT: feat: CONFIG_NICE_OLED_WIDGET_HID_INDICATORS_LUNA_ONLY_CAPSLOCK, README updated
+- [x] COMMIT: feat: CONFIG_NICE_OLED_WIDGET_HID_INDICATORS, README updated
 - [x] CHANGELOG.txt updated
 - [x] README.md updated
 - [x] delete duplicate (in progress)
@@ -12,13 +12,13 @@ https://github.com/mctechnology17/zmk-nice-oled/blob/main/CHANGELOG.txt
 # FEATURES 0.0.1-beta1 (Mar 24, 2025)
 =======================================
 + NEW FEATURES
-- [x] COMMIT: feat: new shield nice_epaper, hid, modifiers, luna the dog
+- [x] COMMIT: feat: new shield nice_epaper, hid, modifiers indicators
 - [x] delete duplicate (in progress)
 - [x] nice_view screen support
 - [x] modifiers support
-- [x] modifiers luna widget support
+- [x] modifiers widget support
 - [x] hid support
-- [x] hid luna widget support
+- [x] hid widget support
 - [x] load animation (in progress)
 - [x] README.md updated
 

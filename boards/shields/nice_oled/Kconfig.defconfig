@@ -101,24 +101,7 @@ config NICE_OLED_WIDGET_HID_INDICATORS
 if NICE_OLED_WIDGET_HID_INDICATORS
 
 config ZMK_HID_INDICATORS
-    bool "Enable HID indicators"
-    default y
-
-config NICE_OLED_WIDGET_HID_INDICATORS_LUNA
-    bool "Enable HID indicators luna"
-    default y
-
-config NICE_OLED_WIDGET_HID_INDICATORS_LUNA_ONLY_CAPSLOCK
-    bool "Enable HID indicators luna only on CapsLock"
-    default n
-
-if NICE_OLED_WIDGET_HID_INDICATORS_LUNA
-
-config NICE_OLED_WIDGET_HID_INDICATORS_LUNA_ANIMATION_MS
-    int "Luna Animation in ms for HID Indicators"
-    default 300
-
-endif # NICE_OLED_WIDGET_HID_INDICATORS_LUNA
+    bool "Enable HID indicators"    default y
 
 endif # NICE_OLED_WIDGET_HID_INDICATORS
 
@@ -129,17 +112,6 @@ config NICE_OLED_WIDGET_MODIFIERS_INDICATORS
 
 if NICE_OLED_WIDGET_MODIFIERS_INDICATORS
 
-config NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA
-    bool "Enable modifiers indicators luna"
-    default y
-
-if NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA
-
-config NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA_ANIMATION_MS
-    int "Luna Animation in ms for Modifiers Indicators"
-    default 300
-
-endif # NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA
 endif # NICE_OLED_WIDGET_MODIFIERS_INDICATORS
 endif # !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
 endif # SHIELD_NICE_OLED

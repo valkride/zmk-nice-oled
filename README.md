@@ -141,26 +141,7 @@ Modify the behavior of this shield by adjusting these options in your personal c
 | `CONFIG_NICE_OLED_GEM_ANIMATION`                                 | bool | If you find the animation distracting (or want to save on battery usage), you can turn it off by setting this option to `n`. It will instead pick a random frame of the animation every time you restart your keyboard.                                           | y       |
 | `CONFIG_NICE_OLED_GEM_ANIMATION_MS`                              | int  | Alternatively, you can slow down the animation. A high value, such as 96000, slows the animation considerably, showing the next frame every couple of seconds. The animation consists of 16 frames, and the default value of 960 milliseconds plays it at 60 fps. | 960     |
 | `CONFIG_NICE_OLED_WIDGET_HID_INDICATORS`                         | bool | Enables the Human Interface Device (HID) indicators widget.                                                                                                                                                                                                       | y       |
-| `CONFIG_NICE_OLED_WIDGET_HID_INDICATORS_LUNA`                    | bool | Activates the Luna animation for the HID indicators widget.                                                                                                                                                                                                       | y       |
-| `CONFIG_NICE_OLED_WIDGET_HID_INDICATORS_LUNA_ONLY_CAPSLOCK`      | bool | Activates the Luna animation for the HID indicators widget [ONLY for CapsLock ](https://zmk.dev/docs/keymaps/list-of-keycodes#locks)                                                                                                                  | n       |
-| `CONFIG_NICE_OLED_WIDGET_HID_INDICATORS_LUNA_ANIMATION_MS`       | int  | Sets the duration of the Luna animation for the HID indicators widget (in milliseconds).                                                                                                                                                                          | 300     |
 | `CONFIG_NICE_OLED_WIDGET_MODIFIERS_INDICATORS`                   | bool | Enables the modifiers indicators widget, which shows active modifier keys.                                                                                                                                                                                        | y       |
-| `CONFIG_NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA`              | bool | Activates the Luna animation for the modifiers indicators widget.                                                                                                                                                                                                 | y       |
-| `CONFIG_NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA_ANIMATION_MS` | int  | Sets the duration of the Luna animation for the modifiers indicators widget (in milliseconds).                                                                                                                                                                    | 300     |
-
-
-You can deactivate luna the dog as follows (default is activated):
-```conf
-CONFIG_NICE_OLED_WIDGET_HID_INDICATORS=n
-CONFIG_NICE_OLED_WIDGET_HID_INDICATORS_LUNA=n
-CONFIG_NICE_OLED_WIDGET_MODIFIERS_INDICATORS=n
-CONFIG_NICE_OLED_WIDGET_MODIFIERS_INDICATORS_LUNA=n
-```
-
-You can enable only the capslock if it is more appropriate for you:
-```conf
-CONFIG_NICE_OLED_WIDGET_HID_INDICATORS_LUNA_ONLY_CAPSLOCK=y
-```
 
 # Suggestions
 If you have any implementation suggestion or something similar opens a
