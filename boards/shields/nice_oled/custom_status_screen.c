@@ -1,6 +1,6 @@
 #include <zephyr/kernel.h>
 
-// Temporarily force peripheral screen for testing
+// Test with peripheral screen to see if rotate_canvas fixes the issue
 #include "widgets/screen_peripheral.h"
 
 #include <zephyr/logging/log.h>

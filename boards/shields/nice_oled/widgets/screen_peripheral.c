@@ -13,6 +13,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/split/bluetooth/peripheral.h>
 #include <zmk/usb.h>
 
+#include "animation.h"
 #include "battery.h"
 #include "output.h"
 #include "screen_peripheral.h"
@@ -26,13 +27,13 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
     
-    // Simple test - fill with a solid color to see if peripheral display is working
-    lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
-    
     // Draw background and status information
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
+    
+    // Rotate for horizontal display - THIS IS CRITICAL!
+    rotate_canvas(canvas, cbuf);
 }
 
 /**
@@ -131,15 +132,9 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
 
     sys_slist_append(&widgets, &widget->node);
     
-    // Initialize state
-    widget->state = get_state(NULL);
-    
-    // Initialize status tracking first
+    // Initialize status tracking 
     widget_battery_status_init();
     widget_peripheral_status_init();
-    
-    // Draw initial content after everything is set up
-    draw_canvas(widget->obj, widget->cbuf, &widget->state);
 
     return 0;
 }
