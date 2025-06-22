@@ -28,15 +28,44 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
 
     // Draw standard peripheral widgets
     draw_background(canvas);
+    
+    // Add a simple test rectangle to verify drawing is working
+    lv_draw_rect_dsc_t test_rect;
+    lv_draw_rect_dsc_init(&test_rect);
+    test_rect.bg_color = lv_color_black();
+    lv_canvas_draw_rect(canvas, 10, 10, 20, 20, &test_rect);
+    
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
+}
+
+/**
+ * Get current state for peripheral display
+ **/
+static struct status_state get_state(const zmk_event_t *_eh) {
+    struct status_state state = {0};
+    
+    // Get battery info
+    int bat_pct = zmk_battery_state_of_charge();
+    state.battery = (bat_pct >= 0) ? bat_pct : 0;
+    
+#if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
+    state.charging = zmk_usb_is_powered();
+#else
+    state.charging = false;
+#endif
+
+    // Get connection status for peripheral
+    state.connected = zmk_split_bt_peripheral_is_connected();
+    
+    return state;
 }
 
 /**
  * Battery status widget
  **/
 
-static struct battery_status_state get_state(const zmk_event_t *_eh) {
+static struct battery_status_state get_battery_state(const zmk_event_t *_eh) {
     return (struct battery_status_state) {
         .level = zmk_battery_state_of_charge(),
         // Note: peripheral doesn't track USB state in status_state
@@ -57,7 +86,7 @@ static void battery_status_update_cb(struct battery_status_state state) {
 }
 
 ZMK_DISPLAY_WIDGET_LISTENER(widget_battery_status, struct battery_status_state,
-                            battery_status_update_cb, get_state);
+                            battery_status_update_cb, get_battery_state);
 
 ZMK_SUBSCRIPTION(widget_battery_status, zmk_battery_state_changed);
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
@@ -101,9 +130,11 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
     lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
     
-    // Initialize the widget state
-    widget->state.battery = zmk_battery_state_of_charge();
-    widget->state.connected = zmk_split_bt_peripheral_is_connected();
+    // Initialize the widget state properly
+    widget->state = get_state(NULL);
+    
+    // Trigger initial draw
+    draw_canvas(widget->obj, widget->cbuf, &widget->state);
     
     widget_battery_status_init();
     widget_peripheral_status_init();
