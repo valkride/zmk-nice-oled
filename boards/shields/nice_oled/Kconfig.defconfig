@@ -101,7 +101,8 @@ config NICE_OLED_WIDGET_HID_INDICATORS
 if NICE_OLED_WIDGET_HID_INDICATORS
 
 config ZMK_HID_INDICATORS
-    bool "Enable HID indicators"    default y
+    bool "Enable HID indicators"
+    default y
 
 endif # NICE_OLED_WIDGET_HID_INDICATORS
 
