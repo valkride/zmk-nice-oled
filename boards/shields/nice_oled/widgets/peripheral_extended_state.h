@@ -5,7 +5,8 @@
 /**
  * Extended status state for peripheral that includes synced data
  */
-struct peripheral_extended_status_state {    // Original peripheral data
+struct peripheral_extended_status_state {
+    // Original peripheral data
     uint8_t battery;
     bool charging;
     bool connected;
