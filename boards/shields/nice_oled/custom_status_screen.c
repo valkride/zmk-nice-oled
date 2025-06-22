@@ -1,10 +1,7 @@
 #include <zephyr/kernel.h>
 
-#if IS_ENABLED(CONFIG_ZMK_SPLIT) && !IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+// Temporarily force peripheral screen for testing
 #include "widgets/screen_peripheral.h"
-#else
-#include "widgets/screen.h"
-#endif
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
