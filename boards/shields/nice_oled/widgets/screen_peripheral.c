@@ -99,14 +99,11 @@ int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     lv_obj_set_size(widget->obj, CANVAS_HEIGHT, CANVAS_WIDTH);
     lv_obj_t *canvas = lv_canvas_create(widget->obj);
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
+    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
     
-    // Initialize the state
+    // Initialize the widget state
     widget->state.battery = zmk_battery_state_of_charge();
     widget->state.connected = zmk_split_bt_peripheral_is_connected();
-    
-    // Draw initial content
-    draw_canvas(widget->obj, widget->cbuf, &widget->state);
     
     widget_battery_status_init();
     widget_peripheral_status_init();
