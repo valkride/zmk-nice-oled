@@ -1,7 +1,10 @@
 #include <zephyr/kernel.h>
 
-// Force use of peripheral screen for debugging
+#if IS_ENABLED(CONFIG_ZMK_SPLIT) && !IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 #include "widgets/screen_peripheral.h"
+#else
+#include "widgets/screen.h"
+#endif
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
