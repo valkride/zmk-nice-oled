@@ -26,7 +26,22 @@ static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status_state *state) {
     lv_obj_t *canvas = lv_obj_get_child(widget, 0);
     
-    // Peripheral (left) display: Simple status display
+    // Clear canvas with white background
+    lv_canvas_fill_bg(canvas, lv_color_white(), LV_OPA_COVER);
+    
+    // Draw a simple black rectangle to test if drawing works
+    lv_draw_rect_dsc_t rect_dsc;
+    lv_draw_rect_dsc_init(&rect_dsc);
+    rect_dsc.bg_color = lv_color_black();
+    lv_canvas_draw_rect(canvas, 10, 10, 50, 30, &rect_dsc);
+    
+    // Draw simple text
+    lv_draw_label_dsc_t label_dsc;
+    lv_draw_label_dsc_init(&label_dsc);
+    label_dsc.color = lv_color_black();
+    lv_canvas_draw_text(canvas, 5, 50, 50, &label_dsc, "BAT");
+    
+    // Try original functions
     draw_background(canvas);
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
