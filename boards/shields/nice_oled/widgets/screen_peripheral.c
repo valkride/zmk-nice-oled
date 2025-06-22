@@ -87,7 +87,7 @@ static void output_status_update_cb(struct peripheral_status_state state) {
 }
 
 ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_status, struct peripheral_status_state,
-                            output_status_update_cb, get_state_peripheral)
+                            output_status_update_cb, get_state_peripheral);
 ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
 
 /**
@@ -96,11 +96,18 @@ ZMK_SUBSCRIPTION(widget_peripheral_status, zmk_split_peripheral_status_changed);
 
 int zmk_widget_screen_init(struct zmk_widget_screen *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
-    lv_obj_set_size(widget->obj, CANVAS_HEIGHT, CANVAS_WIDTH);    lv_obj_t *canvas = lv_canvas_create(widget->obj);
+    lv_obj_set_size(widget->obj, CANVAS_HEIGHT, CANVAS_WIDTH);
+    lv_obj_t *canvas = lv_canvas_create(widget->obj);
     lv_obj_align(canvas, LV_ALIGN_TOP_LEFT, 0, 0);
-    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_HEIGHT, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
-
-    sys_slist_append(&widgets, &widget->node);
+    lv_canvas_set_buffer(canvas, widget->cbuf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);    sys_slist_append(&widgets, &widget->node);
+    
+    // Initialize the state
+    widget->state.battery = zmk_battery_state_of_charge();
+    widget->state.connected = zmk_split_bt_peripheral_is_connected();
+    
+    // Draw initial content
+    draw_canvas(widget->obj, widget->cbuf, &widget->state);
+    
     widget_battery_status_init();
     widget_peripheral_status_init();
 
