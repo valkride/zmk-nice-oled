@@ -1,3 +1,5 @@
+#include <zephyr/kernel.h>
+
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 #include "widgets/screen.h"
 #else
