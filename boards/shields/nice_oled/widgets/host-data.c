@@ -32,33 +32,38 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
         // '0030300090052306252038076'
         //  0123456789012345678901234        // Shift all positions by +1
         // Data: 0040290100052306252222076
-        //       0123456789012345678901234        // Skip first byte (Report ID) - CPU: extract characters 1,2 (only 2 digits)
-        char cpu_str[3];
+        //       0123456789012345678901234        // Skip first byte (Report ID) - CPU: extract all 3 digits (positions 1,2,3)
+        char cpu_str[4];
         cpu_str[0] = data[1];
         cpu_str[1] = data[2]; 
-        cpu_str[2] = '\0';
-        int cpu_val = (cpu_str[0] - '0') * 10 + (cpu_str[1] - '0');
+        cpu_str[2] = data[3];
+        cpu_str[3] = '\0';
+        int cpu_val = (cpu_str[0] - '0') * 100 + (cpu_str[1] - '0') * 10 + (cpu_str[2] - '0');
         snprintf(g_cpu, sizeof(g_cpu), "%d", cpu_val);
         
-        // RAM: extract characters 4,5 (only 2 digits)
-        char ram_str[3];
+        // RAM: extract all 3 digits (positions 4,5,6)
+        char ram_str[4];
         ram_str[0] = data[4];
         ram_str[1] = data[5];
-        ram_str[2] = '\0';
-        int ram_val = (ram_str[0] - '0') * 10 + (ram_str[1] - '0');
-        snprintf(g_ram, sizeof(g_ram), "%d", ram_val);        // GPU: extract characters 7,8 (only 2 digits)
-        char gpu_str[3];
+        ram_str[2] = data[6];
+        ram_str[3] = '\0';
+        int ram_val = (ram_str[0] - '0') * 100 + (ram_str[1] - '0') * 10 + (ram_str[2] - '0');snprintf(g_ram, sizeof(g_ram), "%d", ram_val);
+          // GPU: extract all 3 digits (positions 7,8,9)
+        char gpu_str[4];
         gpu_str[0] = data[7];
         gpu_str[1] = data[8];
-        gpu_str[2] = '\0';
-        int gpu_val = (gpu_str[0] - '0') * 10 + (gpu_str[1] - '0');
+        gpu_str[2] = data[9];
+        gpu_str[3] = '\0';
+        int gpu_val = (gpu_str[0] - '0') * 100 + (gpu_str[1] - '0') * 10 + (gpu_str[2] - '0');
         snprintf(g_gpu, sizeof(g_gpu), "%d", gpu_val);
-          // DSK: extract characters 10,11 (only 2 digits)
-        char dsk_str[3];
+        
+        // DSK: extract all 3 digits (positions 10,11,12)
+        char dsk_str[4];
         dsk_str[0] = data[10];
         dsk_str[1] = data[11];
-        dsk_str[2] = '\0';
-        int dsk_val = (dsk_str[0] - '0') * 10 + (dsk_str[1] - '0');
+        dsk_str[2] = data[12];
+        dsk_str[3] = '\0';
+        int dsk_val = (dsk_str[0] - '0') * 100 + (dsk_str[1] - '0') * 10 + (dsk_str[2] - '0');
         snprintf(g_disk, sizeof(g_disk), "%d", dsk_val);
         
         // Extract DATE (positions 12-17: '230625') → 23/06/25        // Extract DATE (positions 12-17: '230625')
