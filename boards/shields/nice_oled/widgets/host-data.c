@@ -66,7 +66,7 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
 
 void draw_host_data_status(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_label_dsc_t label_dsc;
-    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_8, LV_TEXT_ALIGN_LEFT);    // Format and draw date (DD/MM/YY format from DDMMYY) - left aligned
+    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_LEFT);// Format and draw date (DD/MM/YY format from DDMMYY) - left aligned
     char date_text[16] = {};
     snprintf(date_text, sizeof(date_text), "%c%c/%c%c/%c%c", g_date[0], g_date[1], g_date[2], g_date[3], g_date[4], g_date[5]);
     lv_canvas_draw_text(canvas, 0, 68, 50, &label_dsc, date_text);
