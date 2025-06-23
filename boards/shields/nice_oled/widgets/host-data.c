@@ -26,9 +26,9 @@ static void redraw_work_handler(struct k_work *work);
 
 // Parse HID data and update global variables
 static void parse_hid_data(uint8_t *data, uint8_t length) {
-    if (length >= 22) {  // Minimum length needed for all data
-        // Data format from your example: '0030290090052306252015076'
-        // Positions:                     0123456789012345678901234
+    if (length >= 23) {  // Minimum length needed for all data
+        // Data format: '0030300090052306252038076'
+        // Groups of 3: CPU(003) RAM(030) GPU(009) DSK(005) + DATE/TIME
         
         // Extract CPU (positions 0-2) - convert 3 ASCII digits to number
         int cpu_val = (data[0] - '0') * 100 + (data[1] - '0') * 10 + (data[2] - '0');
@@ -48,6 +48,21 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
         
         // Extract DATE (positions 12-17) - copy 6 ASCII digits directly
         g_date[0] = data[12];
+        g_date[1] = data[13];
+        g_date[2] = data[14];
+        g_date[3] = data[15];
+        g_date[4] = data[16];
+        g_date[5] = data[17];
+        g_date[6] = '\0';
+        
+        // Extract TIME (positions 18-21) - copy 4 ASCII digits directly
+        g_time[0] = data[18];
+        g_time[1] = data[19];
+        g_time[2] = data[20];
+        g_time[3] = data[21];
+        g_time[4] = '\0';
+    }
+}
         g_date[1] = data[13];
         g_date[2] = data[14];
         g_date[3] = data[15];
