@@ -53,6 +53,7 @@ static void draw_active_profile_text(lv_obj_t *canvas,
 
 void draw_profile_status(lv_obj_t *canvas, const struct status_state *state) {
   draw_active_profile_text(canvas, state);
-  draw_inactive_profiles(canvas, state);
-  draw_active_profile(canvas, state);
+  // Removed layer indicator dots
+  // draw_inactive_profiles(canvas, state);
+  // draw_active_profile(canvas, state);
 }
