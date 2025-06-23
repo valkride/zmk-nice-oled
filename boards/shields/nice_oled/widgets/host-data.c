@@ -30,42 +30,42 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
         // Correct data format based on your specification:
         // CPU(003) + RAM(030) + GPU(009) + DSK(005) + DATE(230625) + TIME(2038) + VOL(076)
         // '0030300090052306252038076'
-        //  0123456789012345678901234        // Debug: Let's try direct character extraction
-        // Data: 0040290100052306252207076
+        //  0123456789012345678901234        // Shift all positions by +1
+        // Data: 0040290100052306252222076
         //       0123456789012345678901234
         
-        // CPU: extract characters 0,1,2 and convert properly
+        // CPU: extract characters 1,2,3 (shifted from 0,1,2)
         char cpu_str[4];
-        cpu_str[0] = data[0];
-        cpu_str[1] = data[1]; 
-        cpu_str[2] = data[2];
+        cpu_str[0] = data[1];
+        cpu_str[1] = data[2]; 
+        cpu_str[2] = data[3];
         cpu_str[3] = '\0';
         int cpu_val = (cpu_str[0] - '0') * 100 + (cpu_str[1] - '0') * 10 + (cpu_str[2] - '0');
         snprintf(g_cpu, sizeof(g_cpu), "%d", cpu_val);
         
-        // RAM: extract characters 3,4,5
+        // RAM: extract characters 4,5,6 (shifted from 3,4,5)
         char ram_str[4];
-        ram_str[0] = data[3];
-        ram_str[1] = data[4];
-        ram_str[2] = data[5]; 
+        ram_str[0] = data[4];
+        ram_str[1] = data[5];
+        ram_str[2] = data[6]; 
         ram_str[3] = '\0';
         int ram_val = (ram_str[0] - '0') * 100 + (ram_str[1] - '0') * 10 + (ram_str[2] - '0');
         snprintf(g_ram, sizeof(g_ram), "%d", ram_val);
         
-        // GPU: extract characters 6,7,8
+        // GPU: extract characters 7,8,9 (shifted from 6,7,8)
         char gpu_str[4];
-        gpu_str[0] = data[6];
-        gpu_str[1] = data[7];
-        gpu_str[2] = data[8];
+        gpu_str[0] = data[7];
+        gpu_str[1] = data[8];
+        gpu_str[2] = data[9];
         gpu_str[3] = '\0';
         int gpu_val = (gpu_str[0] - '0') * 100 + (gpu_str[1] - '0') * 10 + (gpu_str[2] - '0');
         snprintf(g_gpu, sizeof(g_gpu), "%d", gpu_val);
         
-        // DSK: extract characters 9,10,11
+        // DSK: extract characters 10,11,12 (shifted from 9,10,11)
         char dsk_str[4];
-        dsk_str[0] = data[9];
-        dsk_str[1] = data[10];
-        dsk_str[2] = data[11];
+        dsk_str[0] = data[10];
+        dsk_str[1] = data[11];
+        dsk_str[2] = data[12];
         dsk_str[3] = '\0';
         int dsk_val = (dsk_str[0] - '0') * 100 + (dsk_str[1] - '0') * 10 + (dsk_str[2] - '0');
         snprintf(g_disk, sizeof(g_disk), "%d", dsk_val);
@@ -78,12 +78,11 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
         g_date[4] = data[16];
         g_date[5] = data[17];
         g_date[6] = '\0';
-        
-        // Extract TIME (positions 18-21: '2207')
-        g_time[0] = data[18];
-        g_time[1] = data[19];
-        g_time[2] = data[20];
-        g_time[3] = data[21];
+          // Extract TIME (positions 20-23: '2222')
+        g_time[0] = data[20];
+        g_time[1] = data[21];
+        g_time[2] = data[22];
+        g_time[3] = data[23];
         g_time[4] = '\0';
         
         // VOLUME is at positions 22-24: '076' → 76% (we can ignore this for now)
