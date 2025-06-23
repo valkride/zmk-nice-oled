@@ -26,28 +26,47 @@ static void redraw_work_handler(struct k_work *work);
 
 // Parse HID data and update global variables
 static void parse_hid_data(uint8_t *data, uint8_t length) {
-    if (length >= 23) {  // Minimum length needed for all data
-        // Data format: '0030300090052306252038076'
-        // Groups of 3: CPU(003) RAM(030) GPU(009) DSK(005) + DATE/TIME
+    if (length >= 25) {  // Minimum length needed for all data
+        // Correct data format based on your specification:
+        // CPU(003) + RAM(030) + GPU(009) + DSK(005) + DATE(230625) + TIME(2038) + VOL(076)
+        // '0030300090052306252038076'
+        //  0123456789012345678901234
         
-        // Extract CPU (positions 0-2) - convert 3 ASCII digits to number
+        // Extract CPU (positions 0-2: '003') → 3
         int cpu_val = (data[0] - '0') * 100 + (data[1] - '0') * 10 + (data[2] - '0');
         snprintf(g_cpu, sizeof(g_cpu), "%d", cpu_val);
         
-        // Extract RAM (positions 3-5) - convert 3 ASCII digits to number
+        // Extract RAM (positions 3-5: '030') → 30
         int ram_val = (data[3] - '0') * 100 + (data[4] - '0') * 10 + (data[5] - '0');
         snprintf(g_ram, sizeof(g_ram), "%d", ram_val);
         
-        // Extract GPU (positions 6-8) - convert 3 ASCII digits to number
+        // Extract GPU (positions 6-8: '009') → 9
         int gpu_val = (data[6] - '0') * 100 + (data[7] - '0') * 10 + (data[8] - '0');
         snprintf(g_gpu, sizeof(g_gpu), "%d", gpu_val);
         
-        // Extract DSK (positions 9-11) - convert 3 ASCII digits to number
+        // Extract DSK (positions 9-11: '005') → 5
         int dsk_val = (data[9] - '0') * 100 + (data[10] - '0') * 10 + (data[11] - '0');
         snprintf(g_disk, sizeof(g_disk), "%d", dsk_val);
         
-        // Extract DATE (positions 12-17) - copy 6 ASCII digits directly
+        // Extract DATE (positions 12-17: '230625') → 23/06/25
         g_date[0] = data[12];
+        g_date[1] = data[13];
+        g_date[2] = data[14];
+        g_date[3] = data[15];
+        g_date[4] = data[16];
+        g_date[5] = data[17];
+        g_date[6] = '\0';
+        
+        // Extract TIME (positions 18-21: '2038') → 20:38
+        g_time[0] = data[18];
+        g_time[1] = data[19];
+        g_time[2] = data[20];
+        g_time[3] = data[21];
+        g_time[4] = '\0';
+        
+        // VOLUME is at positions 22-24: '076' → 76% (we can ignore this for now)
+    }
+}
         g_date[1] = data[13];
         g_date[2] = data[14];
         g_date[3] = data[15];
