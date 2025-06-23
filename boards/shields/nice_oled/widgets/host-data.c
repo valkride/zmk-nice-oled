@@ -91,32 +91,24 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
 
 void draw_host_data_status(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_label_dsc_t label_dsc;
-    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_LEFT);// Format and draw date (DD/MM/YY format from DDMMYY) - left aligned
-    char date_text[16] = {};
-    snprintf(date_text, sizeof(date_text), "%c%c/%c%c/%c%c", g_date[0], g_date[1], g_date[2], g_date[3], g_date[4], g_date[5]);
-    lv_canvas_draw_text(canvas, 0, 68, 50, &label_dsc, date_text);
-    
-    // Format and draw time (HH:MM format from HHMM) - left aligned
-    char time_text[16] = {};
-    snprintf(time_text, sizeof(time_text), "%c%c:%c%c", g_time[0], g_time[1], g_time[2], g_time[3]);
-    lv_canvas_draw_text(canvas, 0, 78, 50, &label_dsc, time_text);
+    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_LEFT);
     
     // Draw system info with full indicator names
     char cpu_text[16] = {};
     snprintf(cpu_text, sizeof(cpu_text), "C:%s%%", g_cpu);
-    lv_canvas_draw_text(canvas, 0, 88, 50, &label_dsc, cpu_text);
+    lv_canvas_draw_text(canvas, 0, 68, 50, &label_dsc, cpu_text);
     
     char gpu_text[16] = {};
     snprintf(gpu_text, sizeof(gpu_text), "G:%s%%", g_gpu);
-    lv_canvas_draw_text(canvas, 0, 98, 50, &label_dsc, gpu_text);
+    lv_canvas_draw_text(canvas, 0, 78, 50, &label_dsc, gpu_text);
 
     char ram_text[16] = {};
     snprintf(ram_text, sizeof(ram_text), "R:%s%%", g_ram);
-    lv_canvas_draw_text(canvas, 0, 108, 50, &label_dsc, ram_text);
+    lv_canvas_draw_text(canvas, 0, 88, 50, &label_dsc, ram_text);
     
     char dsk_text[16] = {};
     snprintf(dsk_text, sizeof(dsk_text), "D:%s%%", g_disk);
-    lv_canvas_draw_text(canvas, 0, 118, 50, &label_dsc, dsk_text);
+    lv_canvas_draw_text(canvas, 0, 98, 50, &label_dsc, dsk_text);
 }
 
 // Update all screen widgets when new HID data is received
