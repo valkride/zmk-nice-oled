@@ -22,6 +22,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include "output.h"
 #include "profile.h"
 #include "battery.h"
+#include "host-data.h"
 #include "screen.h"
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
@@ -53,13 +54,14 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     // Central/Main (right) display: Show Bluetooth, battery, layer, and profile
     draw_background(canvas);
     draw_output_status(canvas, state);
-    draw_battery_status(canvas, state);
-    
-    // Draw separator line below battery widget
+    draw_battery_status(canvas, state);    // Draw separator line below battery widget
     lv_draw_line_dsc_t line_dsc1;
     init_line_dsc(&line_dsc1, LVGL_FOREGROUND, 1);
     lv_point_t line_points1[] = {{0, 65}, {68, 65}};
     lv_canvas_draw_line(canvas, line_points1, 2, &line_dsc1);
+    
+    // Draw host data status widget
+    draw_host_data_status(canvas, state);
     
     // Draw separator line above layer indicator  
     lv_draw_line_dsc_t line_dsc2;
