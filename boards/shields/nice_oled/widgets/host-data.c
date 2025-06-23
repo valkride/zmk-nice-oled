@@ -26,9 +26,9 @@ void draw_host_data_status(lv_obj_t *canvas, const struct status_state *state) {
     
     char ram_text[16] = {};
     snprintf(ram_text, sizeof(ram_text), "RAM:100");
-    lv_canvas_draw_text(canvas, 0, 108, 68, &label_dsc, ram_text);    
+    lv_canvas_draw_text(canvas, 0, 108, 68, &label_dsc, ram_text);
+    
     char dsk_text[16] = {};
     snprintf(dsk_text, sizeof(dsk_text), "DSK:100");
     lv_canvas_draw_text(canvas, 0, 118, 68, &label_dsc, dsk_text);
-    */
 }
