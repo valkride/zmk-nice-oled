@@ -23,11 +23,6 @@ static bool timer_initialized = false;
 // Forward declaration
 static void redraw_work_handler(struct k_work *work);
 
-struct zmk_widget_host_data {
-    sys_snode_t node;
-    lv_obj_t *obj;
-};
-
 // Parse HID data and update global variables
 static void parse_hid_data(uint8_t *data, uint8_t length) {
     if (length >= 22) {  // Minimum length needed for all data

@@ -6,31 +6,6 @@
 
 LV_IMG_DECLARE(profiles);
 
-static void draw_inactive_profiles(lv_obj_t *canvas,
-                                   const struct status_state *state) {
-  lv_draw_img_dsc_t img_dsc;
-  lv_draw_img_dsc_init(&img_dsc);
-
-  lv_canvas_draw_img(canvas, 0, 137, &profiles, &img_dsc);
-  // lv_canvas_draw_img(canvas, 18, 129, &profiles, &img_dsc);
-}
-
-static void draw_active_profile(lv_obj_t *canvas,
-                                const struct status_state *state) {
-  lv_draw_rect_dsc_t rect_white_dsc;
-  init_rect_dsc(&rect_white_dsc, LVGL_FOREGROUND);
-
-  #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-  int offset = state->active_profile_index * 7;
-  #else
-  // For peripheral builds, use default profile 0
-  int offset = 0;
-  #endif
-
-  lv_canvas_draw_rect(canvas, 0 + offset, 137, 3, 3, &rect_white_dsc);
-  // lv_canvas_draw_rect(canvas, 18 + offset, 129, 3, 3, &rect_white_dsc);
-}
-
 // MC: mejor implementación
 static void draw_active_profile_text(lv_obj_t *canvas,
                                      const struct status_state *state) {
