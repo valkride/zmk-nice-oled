@@ -3,21 +3,20 @@
 #include <zephyr/kernel.h>
 
 void draw_host_data_status(lv_obj_t *canvas, const struct status_state *state) {
-    lv_draw_label_dsc_t label_center_dsc;
-    init_label_dsc(&label_center_dsc, LVGL_FOREGROUND, &pixel_operator_mono_8, LV_TEXT_ALIGN_CENTER);
-    
-    lv_draw_label_dsc_t label_left_dsc;
-    init_label_dsc(&label_left_dsc, LVGL_FOREGROUND, &pixel_operator_mono_8, LV_TEXT_ALIGN_LEFT);    // Draw date manually centered (approximate center for date string)
+    lv_draw_label_dsc_t label_dsc;
+    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_8, LV_TEXT_ALIGN_LEFT);
+
+    // Draw date - try centering with smaller X offset
     char date_text[16] = {};
-    snprintf(date_text, sizeof(date_text), "28/12/2023");
-    lv_canvas_draw_text(canvas, 10, 68, 68, &label_center_dsc, date_text);
+    snprintf(date_text, sizeof(date_text), "28/12");
+    lv_canvas_draw_text(canvas, 15, 68, 50, &label_dsc, date_text);
     
-    // Draw time manually centered (approximate center for time string)
+    // Draw time - try centering with smaller X offset  
     char time_text[16] = {};
     snprintf(time_text, sizeof(time_text), "14:30");
-    lv_canvas_draw_text(canvas, 20, 78, 68, &label_center_dsc, time_text);
+    lv_canvas_draw_text(canvas, 15, 78, 50, &label_dsc, time_text);
     
-    // Draw system info left-aligned with tighter spacing
+    // Draw system info with shorter text to fit
     char cpu_text[16] = {};
     snprintf(cpu_text, sizeof(cpu_text), "CPU:100");
     lv_canvas_draw_text(canvas, 0, 88, 68, &label_left_dsc, cpu_text);
@@ -33,4 +32,5 @@ void draw_host_data_status(lv_obj_t *canvas, const struct status_state *state) {
     char dsk_text[16] = {};
     snprintf(dsk_text, sizeof(dsk_text), "DSK:100");
     lv_canvas_draw_text(canvas, 0, 118, 68, &label_left_dsc, dsk_text);
+    */
 }
