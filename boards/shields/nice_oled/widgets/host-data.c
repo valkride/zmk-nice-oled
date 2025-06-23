@@ -56,23 +56,7 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
         g_date[6] = '\0';
         
         // Extract TIME (positions 18-21) - copy 4 ASCII digits directly
-        g_time[0] = data[18];
-        g_time[1] = data[19];
-        g_time[2] = data[20];
-        g_time[3] = data[21];
-        g_time[4] = '\0';
-    }
-}
-        g_date[1] = data[13];
-        g_date[2] = data[14];
-        g_date[3] = data[15];
-        g_date[4] = data[16];
-        g_date[5] = data[17];
-        g_date[6] = '\0';
-        
-        // Extract TIME (positions 18-21) - copy 4 ASCII digits directly
-        g_time[0] = data[18];
-        g_time[1] = data[19];
+        g_time[0] = data[18];        g_time[1] = data[19];
         g_time[2] = data[20];
         g_time[3] = data[21];
         g_time[4] = '\0';
