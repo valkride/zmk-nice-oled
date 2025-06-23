@@ -75,12 +75,11 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
         g_date[3] = data[15];
         g_date[4] = data[16];
         g_date[5] = data[17];
-        g_date[6] = '\0';
-          // Extract TIME (positions 20-23: '2222')
-        g_time[0] = data[20];
-        g_time[1] = data[21];
-        g_time[2] = data[22];
-        g_time[3] = data[23];
+        g_date[6] = '\0';        // Extract TIME (positions 18-21: HHMM format)
+        g_time[0] = data[18];
+        g_time[1] = data[19];
+        g_time[2] = data[20];
+        g_time[3] = data[21];
         g_time[4] = '\0';
         
         // VOLUME is at positions 22-24: '076' → 76% (we can ignore this for now)
@@ -154,9 +153,8 @@ static int host_data_hid_listener(const zmk_event_t *eh) {
     }    if (event && event->length > 0) {
         const uint8_t *data = event->data;
         
-        // Try with +2 offset - BLE might add header bytes
-        // Expected data: CPU(003) + RAM(030) + GPU(009) + DSK(005) + others...
-        parse_hid_data((uint8_t*)(data + 2), event->length - 2);
+        // Data should be exactly as sent from Python host
+        parse_hid_data((uint8_t*)data, event->length);
     }
     return ZMK_EV_EVENT_BUBBLE;
 }
