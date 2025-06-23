@@ -30,43 +30,40 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
         // Correct data format based on your specification:
         // CPU(003) + RAM(030) + GPU(009) + DSK(005) + DATE(230625) + TIME(2038) + VOL(076)
         // '0030300090052306252038076'
-        //  0123456789012345678901234        // Try both with and without Report ID offset
-        // If ZMK RAW HID strips Report ID, data starts at position 0
-        // If Report ID is kept, data starts at position 1
+        //  0123456789012345678901234        // Simple parsing - no Report ID, direct positions
+        // Data: 0040290100052306252207076
+        //       0123456789012345678901234
         
-        // Check if first byte looks like Report ID (0x01) or data ('0')
-        int offset = (data[0] == 0x01) ? 1 : 0;
-        
-        // Extract CPU (positions offset+0 to offset+2)
-        int cpu_val = (data[offset+0] - '0') * 100 + (data[offset+1] - '0') * 10 + (data[offset+2] - '0');
+        // Extract CPU (positions 0-2: '004') → 4
+        int cpu_val = (data[0] - '0') * 100 + (data[1] - '0') * 10 + (data[2] - '0');
         snprintf(g_cpu, sizeof(g_cpu), "%d", cpu_val);
         
-        // Extract RAM (positions offset+3 to offset+5)
-        int ram_val = (data[offset+3] - '0') * 100 + (data[offset+4] - '0') * 10 + (data[offset+5] - '0');
+        // Extract RAM (positions 3-5: '029') → 29  
+        int ram_val = (data[3] - '0') * 100 + (data[4] - '0') * 10 + (data[5] - '0');
         snprintf(g_ram, sizeof(g_ram), "%d", ram_val);
         
-        // Extract GPU (positions offset+6 to offset+8)
-        int gpu_val = (data[offset+6] - '0') * 100 + (data[offset+7] - '0') * 10 + (data[offset+8] - '0');
+        // Extract GPU (positions 6-8: '010') → 10
+        int gpu_val = (data[6] - '0') * 100 + (data[7] - '0') * 10 + (data[8] - '0');
         snprintf(g_gpu, sizeof(g_gpu), "%d", gpu_val);
         
-        // Extract DSK (positions offset+9 to offset+11)
-        int dsk_val = (data[offset+9] - '0') * 100 + (data[offset+10] - '0') * 10 + (data[offset+11] - '0');
+        // Extract DSK (positions 9-11: '005') → 5
+        int dsk_val = (data[9] - '0') * 100 + (data[10] - '0') * 10 + (data[11] - '0');
         snprintf(g_disk, sizeof(g_disk), "%d", dsk_val);
         
-        // Extract DATE (positions 12-17: '230625') → 23/06/25        // Extract DATE (positions offset+12 to offset+17)
-        g_date[0] = data[offset+12];
-        g_date[1] = data[offset+13];
-        g_date[2] = data[offset+14];
-        g_date[3] = data[offset+15];
-        g_date[4] = data[offset+16];
-        g_date[5] = data[offset+17];
+        // Extract DATE (positions 12-17: '230625') → 23/06/25        // Extract DATE (positions 12-17: '230625')
+        g_date[0] = data[12];
+        g_date[1] = data[13]; 
+        g_date[2] = data[14];
+        g_date[3] = data[15];
+        g_date[4] = data[16];
+        g_date[5] = data[17];
         g_date[6] = '\0';
         
-        // Extract TIME (positions offset+18 to offset+21)
-        g_time[0] = data[offset+18];
-        g_time[1] = data[offset+19];
-        g_time[2] = data[offset+20];
-        g_time[3] = data[offset+21];
+        // Extract TIME (positions 18-21: '2207')
+        g_time[0] = data[18];
+        g_time[1] = data[19];
+        g_time[2] = data[20];
+        g_time[3] = data[21];
         g_time[4] = '\0';
         
         // VOLUME is at positions 22-24: '076' → 76% (we can ignore this for now)
