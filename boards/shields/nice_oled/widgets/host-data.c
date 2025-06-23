@@ -40,13 +40,14 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
         cpu_str[3] = '\0';
         int cpu_val = (cpu_str[0] - '0') * 100 + (cpu_str[1] - '0') * 10 + (cpu_str[2] - '0');
         snprintf(g_cpu, sizeof(g_cpu), "%d", cpu_val);
-        
-        // RAM: extract all 3 digits (positions 3,4,5)
+          // RAM: extract all 3 digits (positions 3,4,5)
         char ram_str[4];
         ram_str[0] = data[3];
         ram_str[1] = data[4];
         ram_str[2] = data[5];
-        ram_str[3] = '\0';        snprintf(g_ram, sizeof(g_ram), "%d", ram_val);
+        ram_str[3] = '\0';
+        int ram_val = (ram_str[0] - '0') * 100 + (ram_str[1] - '0') * 10 + (ram_str[2] - '0');
+        snprintf(g_ram, sizeof(g_ram), "%d", ram_val);
         
         // GPU: extract all 3 digits (positions 6,7,8)
         char gpu_str[4];
