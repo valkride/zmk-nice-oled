@@ -31,22 +31,29 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
         // CPU(003) + RAM(030) + GPU(009) + DSK(005) + DATE(230625) + TIME(2038) + VOL(076)
         // '0030300090052306252038076'
         //  0123456789012345678901234
-        
-        // Extract CPU (positions 0-2: '003') → 3
+          // Extract CPU (positions 0-2: '003') → 3
         int cpu_val = (data[0] - '0') * 100 + (data[1] - '0') * 10 + (data[2] - '0');
-        snprintf(g_cpu, sizeof(g_cpu), "%d", cpu_val);
+        if (cpu_val >= 0 && cpu_val <= 100) {
+            snprintf(g_cpu, sizeof(g_cpu), "%d", cpu_val);
+        }
         
         // Extract RAM (positions 3-5: '030') → 30
         int ram_val = (data[3] - '0') * 100 + (data[4] - '0') * 10 + (data[5] - '0');
-        snprintf(g_ram, sizeof(g_ram), "%d", ram_val);
+        if (ram_val >= 0 && ram_val <= 100) {
+            snprintf(g_ram, sizeof(g_ram), "%d", ram_val);
+        }
         
         // Extract GPU (positions 6-8: '009') → 9
         int gpu_val = (data[6] - '0') * 100 + (data[7] - '0') * 10 + (data[8] - '0');
-        snprintf(g_gpu, sizeof(g_gpu), "%d", gpu_val);
+        if (gpu_val >= 0 && gpu_val <= 100) {
+            snprintf(g_gpu, sizeof(g_gpu), "%d", gpu_val);
+        }
         
         // Extract DSK (positions 9-11: '005') → 5
         int dsk_val = (data[9] - '0') * 100 + (data[10] - '0') * 10 + (data[11] - '0');
-        snprintf(g_disk, sizeof(g_disk), "%d", dsk_val);
+        if (dsk_val >= 0 && dsk_val <= 100) {
+            snprintf(g_disk, sizeof(g_disk), "%d", dsk_val);
+        }
         
         // Extract DATE (positions 12-17: '230625') → 23/06/25
         g_date[0] = data[12];
