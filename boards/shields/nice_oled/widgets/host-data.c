@@ -93,19 +93,19 @@ void draw_host_data_status(lv_obj_t *canvas, const struct status_state *state) {
     
     // Draw system info with full indicator names
     char cpu_text[16] = {};
-    snprintf(cpu_text, sizeof(cpu_text), "CPU:%s%%", g_cpu);
+    snprintf(cpu_text, sizeof(cpu_text), "C:%s%%", g_cpu);
     lv_canvas_draw_text(canvas, 0, 88, 50, &label_dsc, cpu_text);
     
     char gpu_text[16] = {};
-    snprintf(gpu_text, sizeof(gpu_text), "GPU:%s%%", g_gpu);
+    snprintf(gpu_text, sizeof(gpu_text), "G:%s%%", g_gpu);
     lv_canvas_draw_text(canvas, 0, 98, 50, &label_dsc, gpu_text);
 
     char ram_text[16] = {};
-    snprintf(ram_text, sizeof(ram_text), "RAM:%s%%", g_ram);
+    snprintf(ram_text, sizeof(ram_text), "R:%s%%", g_ram);
     lv_canvas_draw_text(canvas, 0, 108, 50, &label_dsc, ram_text);
     
     char dsk_text[16] = {};
-    snprintf(dsk_text, sizeof(dsk_text), "DSK:%s%%", g_disk);
+    snprintf(dsk_text, sizeof(dsk_text), "D:%s%%", g_disk);
     lv_canvas_draw_text(canvas, 0, 118, 50, &label_dsc, dsk_text);
 }
 
