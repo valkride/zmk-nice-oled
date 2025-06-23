@@ -17,11 +17,11 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_NICE_VIEW_WIDGET_STATUS)
     if(CONFIG_NICE_OLED_WIDGET_LAYER_RGB)
       # zephyr_library_sources(widgets/layer.c)
     endif()
-    
-    target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_HID_INDICATORS app PRIVATE widgets/hid_indicators.c)
+      target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_HID_INDICATORS app PRIVATE widgets/hid_indicators.c)
     target_sources_ifdef(CONFIG_NICE_OLED_WIDGET_MODIFIERS_INDICATORS app PRIVATE widgets/modifiers.c)
     zephyr_library_sources(widgets/layer.c)
     zephyr_library_sources(widgets/profile.c)
+    zephyr_library_sources(widgets/host-data.c)
     zephyr_library_sources(widgets/screen.c)
       # Central display: simple status only
   else()
