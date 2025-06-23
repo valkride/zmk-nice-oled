@@ -53,15 +53,12 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
         gpu_str[2] = '\0';
         int gpu_val = (gpu_str[0] - '0') * 10 + (gpu_str[1] - '0');
         snprintf(g_gpu, sizeof(g_gpu), "%d", gpu_val);
-        
-        // DSK: extract characters 10,11 (only 2 digits)
+          // DSK: extract characters 10,11 (only 2 digits)
         char dsk_str[3];
         dsk_str[0] = data[10];
         dsk_str[1] = data[11];
         dsk_str[2] = '\0';
         int dsk_val = (dsk_str[0] - '0') * 10 + (dsk_str[1] - '0');
-        dsk_str[3] = '\0';
-        int dsk_val = (dsk_str[0] - '0') * 100 + (dsk_str[1] - '0') * 10 + (dsk_str[2] - '0');
         snprintf(g_disk, sizeof(g_disk), "%d", dsk_val);
         
         // Extract DATE (positions 12-17: '230625') → 23/06/25        // Extract DATE (positions 12-17: '230625')
