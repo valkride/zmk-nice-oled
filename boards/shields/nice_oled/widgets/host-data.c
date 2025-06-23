@@ -8,12 +8,12 @@
 #include <stdlib.h>
 
 // Global variables to store the latest host data
-static char g_cpu[4] = "045";
-static char g_ram[4] = "067";
-static char g_gpu[4] = "023";
-static char g_disk[4] = "089";
-static char g_date[7] = "230625";
-static char g_time[5] = "1951";
+static char g_cpu[4] = "000";
+static char g_ram[4] = "000";
+static char g_gpu[4] = "000";
+static char g_disk[4] = "000";
+static char g_date[7] = "000000";
+static char g_time[5] = "0000";
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
 
@@ -30,32 +30,23 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
         // Correct data format based on your specification:
         // CPU(003) + RAM(030) + GPU(009) + DSK(005) + DATE(230625) + TIME(2038) + VOL(076)
         // '0030300090052306252038076'
-        //  0123456789012345678901234
-          // Extract CPU (positions 0-2: '003') → 3
+        //  0123456789012345678901234        // Extract CPU (positions 0-2: '003') → should show 3
         int cpu_val = (data[0] - '0') * 100 + (data[1] - '0') * 10 + (data[2] - '0');
-        if (cpu_val >= 0 && cpu_val <= 100) {
-            snprintf(g_cpu, sizeof(g_cpu), "%d", cpu_val);
-        }
+        snprintf(g_cpu, sizeof(g_cpu), "%d", cpu_val);
         
-        // Extract RAM (positions 3-5: '030') → 30
+        // Extract RAM (positions 3-5: '030') → should show 30
         int ram_val = (data[3] - '0') * 100 + (data[4] - '0') * 10 + (data[5] - '0');
-        if (ram_val >= 0 && ram_val <= 100) {
-            snprintf(g_ram, sizeof(g_ram), "%d", ram_val);
-        }
+        snprintf(g_ram, sizeof(g_ram), "%d", ram_val);
         
-        // Extract GPU (positions 6-8: '009') → 9
+        // Extract GPU (positions 6-8: '009') → should show 9
         int gpu_val = (data[6] - '0') * 100 + (data[7] - '0') * 10 + (data[8] - '0');
-        if (gpu_val >= 0 && gpu_val <= 100) {
-            snprintf(g_gpu, sizeof(g_gpu), "%d", gpu_val);
-        }
+        snprintf(g_gpu, sizeof(g_gpu), "%d", gpu_val);
         
-        // Extract DSK (positions 9-11: '005') → 5
+        // Extract DSK (positions 9-11: '005') → should show 5
         int dsk_val = (data[9] - '0') * 100 + (data[10] - '0') * 10 + (data[11] - '0');
-        if (dsk_val >= 0 && dsk_val <= 100) {
-            snprintf(g_disk, sizeof(g_disk), "%d", dsk_val);
-        }
+        snprintf(g_disk, sizeof(g_disk), "%d", dsk_val);
         
-        // Extract DATE (positions 12-17: '230625') → 23/06/25
+        // Extract DATE (positions 12-17: '230625') → 23/06/25        // Extract DATE (positions 12-17: '230625')
         g_date[0] = data[12];
         g_date[1] = data[13];
         g_date[2] = data[14];
@@ -64,11 +55,12 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
         g_date[5] = data[17];
         g_date[6] = '\0';
         
-        // Extract TIME (positions 18-21: '2038') → 20:38
+        // Extract TIME (positions 18-21: '2124')
         g_time[0] = data[18];
         g_time[1] = data[19];
         g_time[2] = data[20];
-        g_time[3] = data[21];        g_time[4] = '\0';
+        g_time[3] = data[21];
+        g_time[4] = '\0';
         
         // VOLUME is at positions 22-24: '076' → 76% (we can ignore this for now)
     }
