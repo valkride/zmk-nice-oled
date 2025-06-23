@@ -55,11 +55,17 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     draw_output_status(canvas, state);
     draw_battery_status(canvas, state);
     
-    // Draw separator line below battery widget and above layer indicator
-    lv_draw_line_dsc_t line_dsc;
-    init_line_dsc(&line_dsc, LVGL_FOREGROUND, 1);
-    lv_point_t line_points[] = {{0, 70}, {68, 70}};
-    lv_canvas_draw_line(canvas, line_points, 2, &line_dsc);
+    // Draw separator line below battery widget
+    lv_draw_line_dsc_t line_dsc1;
+    init_line_dsc(&line_dsc1, LVGL_FOREGROUND, 1);
+    lv_point_t line_points1[] = {{0, 70}, {68, 70}};
+    lv_canvas_draw_line(canvas, line_points1, 2, &line_dsc1);
+    
+    // Draw separator line above layer indicator  
+    lv_draw_line_dsc_t line_dsc2;
+    init_line_dsc(&line_dsc2, LVGL_FOREGROUND, 1);
+    lv_point_t line_points2[] = {{0, 140}, {68, 140}};
+    lv_canvas_draw_line(canvas, line_points2, 2, &line_dsc2);
     
     draw_layer_status(canvas, state);
     draw_profile_status(canvas, state);
