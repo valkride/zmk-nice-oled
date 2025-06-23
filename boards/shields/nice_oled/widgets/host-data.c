@@ -5,12 +5,13 @@
 #include <zmk/events/layer_state_changed.h>
 #include <raw_hid/events.h>
 #include <string.h>
+#include <stdlib.h>
 
 // Global variables to store the latest host data
-static char g_cpu[4] = "000";
-static char g_ram[4] = "000";
-static char g_gpu[4] = "000";
-static char g_disk[4] = "000";
+static char g_cpu[4] = "045";
+static char g_ram[4] = "067";
+static char g_gpu[4] = "023";
+static char g_disk[4] = "089";
 static char g_date[7] = "230625";
 static char g_time[5] = "1951";
 
@@ -25,62 +26,69 @@ static void redraw_work_handler(struct k_work *work);
 
 // Parse HID data and update global variables
 static void parse_hid_data(uint8_t *data, uint8_t length) {
-    if (length >= 22) {  // Minimum length needed for all data
-        // Extract CPU (positions 0-2)
-        memcpy(g_cpu, &data[0], 3);
-        g_cpu[3] = '\0';
+    if (length >= 18) {  // Minimum length needed for basic data
+        // Data format: CPU(3) + RAM(3) + GPU(3) + DSK(3) + DATE/TIME...
+        // Extract CPU (positions 0-2) - 3 ASCII digits
+        char cpu_raw[4] = {data[0], data[1], data[2], '\0'};
+        int cpu_val = atoi(cpu_raw);
+        snprintf(g_cpu, sizeof(g_cpu), "%d", cpu_val);  // Remove leading zeros
         
-        // Extract RAM (positions 3-5)
-        memcpy(g_ram, &data[3], 3);
-        g_ram[3] = '\0';
+        // Extract RAM (positions 3-5) - 3 ASCII digits  
+        char ram_raw[4] = {data[3], data[4], data[5], '\0'};
+        int ram_val = atoi(ram_raw);
+        snprintf(g_ram, sizeof(g_ram), "%d", ram_val);  // Remove leading zeros
         
-        // Extract GPU (positions 6-8)
-        memcpy(g_gpu, &data[6], 3);
-        g_gpu[3] = '\0';
+        // Extract GPU (positions 6-8) - 3 ASCII digits
+        char gpu_raw[4] = {data[6], data[7], data[8], '\0'};
+        int gpu_val = atoi(gpu_raw);
+        snprintf(g_gpu, sizeof(g_gpu), "%d", gpu_val);  // Remove leading zeros
         
-        // Extract DISK (positions 9-11)
-        memcpy(g_disk, &data[9], 3);
-        g_disk[3] = '\0';
+        // Extract DSK (positions 9-11) - 3 ASCII digits
+        char dsk_raw[4] = {data[9], data[10], data[11], '\0'};
+        int dsk_val = atoi(dsk_raw);
+        snprintf(g_disk, sizeof(g_disk), "%d", dsk_val);  // Remove leading zeros
         
-        // Extract DATE (positions 12-17)
-        memcpy(g_date, &data[12], 6);
-        g_date[6] = '\0';
+        // Extract DATE (positions 12-17) - 6 ASCII digits DDMMYY
+        if (length >= 18) {
+            memcpy(g_date, &data[12], 6);
+            g_date[6] = '\0';
+        }
         
-        // Extract TIME (positions 18-21)
-        memcpy(g_time, &data[18], 4);
-        g_time[4] = '\0';
+        // Extract TIME (positions 18-21) - 4 ASCII digits HHMM  
+        if (length >= 22) {
+            memcpy(g_time, &data[18], 4);
+            g_time[4] = '\0';
+        }
     }
 }
 
 void draw_host_data_status(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_label_dsc_t label_dsc;
-    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_8, LV_TEXT_ALIGN_LEFT);
-
-    // Format and draw date (DD/MM format from DDMMYY)
+    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_8, LV_TEXT_ALIGN_LEFT);    // Format and draw date (DD/MM/YY format from DDMMYY) - left aligned
     char date_text[16] = {};
-    snprintf(date_text, sizeof(date_text), "%c%c/%c%c", g_date[0], g_date[1], g_date[2], g_date[3]);
-    lv_canvas_draw_text(canvas, 15, 68, 50, &label_dsc, date_text);
+    snprintf(date_text, sizeof(date_text), "%c%c/%c%c/%c%c", g_date[0], g_date[1], g_date[2], g_date[3], g_date[4], g_date[5]);
+    lv_canvas_draw_text(canvas, 0, 68, 50, &label_dsc, date_text);
     
-    // Format and draw time (HH:MM format from HHMM)
+    // Format and draw time (HH:MM format from HHMM) - left aligned
     char time_text[16] = {};
     snprintf(time_text, sizeof(time_text), "%c%c:%c%c", g_time[0], g_time[1], g_time[2], g_time[3]);
-    lv_canvas_draw_text(canvas, 15, 78, 50, &label_dsc, time_text);
+    lv_canvas_draw_text(canvas, 0, 78, 50, &label_dsc, time_text);
     
-    // Draw system info with real data
+    // Draw system info with full indicator names
     char cpu_text[16] = {};
-    snprintf(cpu_text, sizeof(cpu_text), "C:%s%%", g_cpu);
+    snprintf(cpu_text, sizeof(cpu_text), "CPU:%s%%", g_cpu);
     lv_canvas_draw_text(canvas, 0, 88, 50, &label_dsc, cpu_text);
     
     char gpu_text[16] = {};
-    snprintf(gpu_text, sizeof(gpu_text), "G:%s%%", g_gpu);
+    snprintf(gpu_text, sizeof(gpu_text), "GPU:%s%%", g_gpu);
     lv_canvas_draw_text(canvas, 0, 98, 50, &label_dsc, gpu_text);
 
     char ram_text[16] = {};
-    snprintf(ram_text, sizeof(ram_text), "R:%s%%", g_ram);
+    snprintf(ram_text, sizeof(ram_text), "RAM:%s%%", g_ram);
     lv_canvas_draw_text(canvas, 0, 108, 50, &label_dsc, ram_text);
     
     char dsk_text[16] = {};
-    snprintf(dsk_text, sizeof(dsk_text), "D:%s%%", g_disk);
+    snprintf(dsk_text, sizeof(dsk_text), "DSK:%s%%", g_disk);
     lv_canvas_draw_text(canvas, 0, 118, 50, &label_dsc, dsk_text);
 }
 
