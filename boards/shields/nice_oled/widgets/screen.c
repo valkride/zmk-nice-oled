@@ -62,11 +62,10 @@ static void draw_canvas(lv_obj_t *widget, lv_color_t cbuf[], const struct status
     
     // Draw host data status widget
     draw_host_data_status(canvas, state);
-    
-    // Draw separator line above layer indicator  
+      // Draw separator line above layer indicator - moved 5 pixels down
     lv_draw_line_dsc_t line_dsc2;
     init_line_dsc(&line_dsc2, LVGL_FOREGROUND, 1);
-    lv_point_t line_points2[] = {{0, 140}, {68, 140}};
+    lv_point_t line_points2[] = {{0, 145}, {68, 145}};
     lv_canvas_draw_line(canvas, line_points2, 2, &line_dsc2);
     
     draw_layer_status(canvas, state);
