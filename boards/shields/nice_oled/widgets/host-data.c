@@ -92,36 +92,36 @@ void draw_host_data_status(lv_obj_t *canvas, const struct status_state *state) {
     // Regular font for values
     lv_draw_label_dsc_t label_dsc;
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_LEFT);    
-    // Draw system info manually centered (3-char labels center at ~26px, values vary)
+    // Draw system info manually centered (for 64px wide display)
     
     // CPU
-    lv_canvas_draw_text(canvas, 26, 70, 20, &label_small_dsc, "CPU");
+    lv_canvas_draw_text(canvas, 20, 70, 24, &label_small_dsc, "CPU");
     char cpu_text[8] = {};
     snprintf(cpu_text, sizeof(cpu_text), "%s", g_cpu);
-    // Center 1-3 digit numbers (estimate width and position)
-    int cpu_x = strlen(g_cpu) == 1 ? 30 : (strlen(g_cpu) == 2 ? 26 : 22);
-    lv_canvas_draw_text(canvas, cpu_x, 78, 20, &label_dsc, cpu_text);
+    // Center values based on length
+    int cpu_x = strlen(g_cpu) == 1 ? 28 : (strlen(g_cpu) == 2 ? 24 : 20);
+    lv_canvas_draw_text(canvas, cpu_x, 78, 24, &label_dsc, cpu_text);
     
     // RAM
-    lv_canvas_draw_text(canvas, 26, 88, 20, &label_small_dsc, "RAM");
+    lv_canvas_draw_text(canvas, 20, 88, 24, &label_small_dsc, "RAM");
     char ram_text[8] = {};
     snprintf(ram_text, sizeof(ram_text), "%s", g_ram);
-    int ram_x = strlen(g_ram) == 1 ? 30 : (strlen(g_ram) == 2 ? 26 : 22);
-    lv_canvas_draw_text(canvas, ram_x, 96, 20, &label_dsc, ram_text);
+    int ram_x = strlen(g_ram) == 1 ? 28 : (strlen(g_ram) == 2 ? 24 : 20);
+    lv_canvas_draw_text(canvas, ram_x, 96, 24, &label_dsc, ram_text);
     
     // GPU
-    lv_canvas_draw_text(canvas, 26, 106, 20, &label_small_dsc, "GPU");
+    lv_canvas_draw_text(canvas, 20, 106, 24, &label_small_dsc, "GPU");
     char gpu_text[8] = {};
     snprintf(gpu_text, sizeof(gpu_text), "%s", g_gpu);
-    int gpu_x = strlen(g_gpu) == 1 ? 30 : (strlen(g_gpu) == 2 ? 26 : 22);
-    lv_canvas_draw_text(canvas, gpu_x, 114, 20, &label_dsc, gpu_text);
+    int gpu_x = strlen(g_gpu) == 1 ? 28 : (strlen(g_gpu) == 2 ? 24 : 20);
+    lv_canvas_draw_text(canvas, gpu_x, 114, 24, &label_dsc, gpu_text);
 
     // DSK
-    lv_canvas_draw_text(canvas, 26, 124, 20, &label_small_dsc, "DSK");
+    lv_canvas_draw_text(canvas, 20, 124, 24, &label_small_dsc, "DSK");
     char dsk_text[8] = {};
     snprintf(dsk_text, sizeof(dsk_text), "%s", g_disk);
-    int dsk_x = strlen(g_disk) == 1 ? 30 : (strlen(g_disk) == 2 ? 26 : 22);
-    lv_canvas_draw_text(canvas, dsk_x, 132, 20, &label_dsc, dsk_text);
+    int dsk_x = strlen(g_disk) == 1 ? 28 : (strlen(g_disk) == 2 ? 24 : 20);
+    lv_canvas_draw_text(canvas, dsk_x, 132, 24, &label_dsc, dsk_text);
 }
 
 // Update all screen widgets when new HID data is received
