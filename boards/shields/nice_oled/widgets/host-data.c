@@ -86,14 +86,14 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
 }
 
 void draw_host_data_status(lv_obj_t *canvas, const struct status_state *state) {
-    // Use the proven ZMK nice_view approach for centering
+    // Now with correct canvas dimensions (68x160), use proper centering
     lv_draw_label_dsc_t label_small_dsc;
     init_label_dsc(&label_small_dsc, LVGL_FOREGROUND, &pixel_operator_mono_8, LV_TEXT_ALIGN_CENTER);
     
     lv_draw_label_dsc_t label_dsc;
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_CENTER);
     
-    // CPU - center across full canvas width like ZMK nice_view does
+    // Center across the display width (68px)
     lv_canvas_draw_text(canvas, 0, 70, 68, &label_small_dsc, "CPU");
     char cpu_text[8] = {};
     snprintf(cpu_text, sizeof(cpu_text), "%s", g_cpu);
