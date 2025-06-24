@@ -93,31 +93,31 @@ void draw_host_data_status(lv_obj_t *canvas, const struct status_state *state) {
     // Regular font for values
     lv_draw_label_dsc_t label_dsc;
     init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_CENTER);    
-    // Draw system info in vertical single column format with smaller spacing and centering
+    // Draw system info in vertical single column format with proper centering (32px from left edge)
     
     // CPU
-    lv_canvas_draw_text(canvas, 0, 70, 64, &label_small_dsc, "CPU");
+    lv_canvas_draw_text(canvas, 32, 70, 32, &label_small_dsc, "CPU");
     char cpu_text[8] = {};
     snprintf(cpu_text, sizeof(cpu_text), "%s", g_cpu);
-    lv_canvas_draw_text(canvas, 0, 78, 64, &label_dsc, cpu_text);
+    lv_canvas_draw_text(canvas, 32, 78, 32, &label_dsc, cpu_text);
     
     // RAM
-    lv_canvas_draw_text(canvas, 0, 88, 64, &label_small_dsc, "RAM");
+    lv_canvas_draw_text(canvas, 32, 88, 32, &label_small_dsc, "RAM");
     char ram_text[8] = {};
     snprintf(ram_text, sizeof(ram_text), "%s", g_ram);
-    lv_canvas_draw_text(canvas, 0, 96, 64, &label_dsc, ram_text);
+    lv_canvas_draw_text(canvas, 32, 96, 32, &label_dsc, ram_text);
     
     // GPU
-    lv_canvas_draw_text(canvas, 0, 106, 64, &label_small_dsc, "GPU");
+    lv_canvas_draw_text(canvas, 32, 106, 32, &label_small_dsc, "GPU");
     char gpu_text[8] = {};
     snprintf(gpu_text, sizeof(gpu_text), "%s", g_gpu);
-    lv_canvas_draw_text(canvas, 0, 114, 64, &label_dsc, gpu_text);
+    lv_canvas_draw_text(canvas, 32, 114, 32, &label_dsc, gpu_text);
 
     // DSK
-    lv_canvas_draw_text(canvas, 0, 124, 64, &label_small_dsc, "DSK");
+    lv_canvas_draw_text(canvas, 32, 124, 32, &label_small_dsc, "DSK");
     char dsk_text[8] = {};
     snprintf(dsk_text, sizeof(dsk_text), "%s", g_disk);
-    lv_canvas_draw_text(canvas, 0, 132, 64, &label_dsc, dsk_text);
+    lv_canvas_draw_text(canvas, 32, 132, 32, &label_dsc, dsk_text);
 }
 
 // Update all screen widgets when new HID data is received
