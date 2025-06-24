@@ -88,22 +88,31 @@ static void parse_hid_data(uint8_t *data, uint8_t length) {
 void draw_host_data_status(lv_obj_t *canvas, const struct status_state *state) {
     lv_draw_label_dsc_t label_dsc;    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &pixel_operator_mono_12, LV_TEXT_ALIGN_LEFT);
     
-    // Draw system info with better spacing and alignment
-    char cpu_text[16] = {};
-    snprintf(cpu_text, sizeof(cpu_text), "CPU %2s%%", g_cpu);
-    lv_canvas_draw_text(canvas, 0, 68, 60, &label_dsc, cpu_text);
+    // Draw system info in two-line format: Label on top, value below
     
-    char ram_text[16] = {};
-    snprintf(ram_text, sizeof(ram_text), "RAM %2s%%", g_ram);
-    lv_canvas_draw_text(canvas, 0, 78, 60, &label_dsc, ram_text);
+    // CPU
+    lv_canvas_draw_text(canvas, 0, 68, 30, &label_dsc, "CPU");
+    char cpu_text[8] = {};
+    snprintf(cpu_text, sizeof(cpu_text), "%s", g_cpu);
+    lv_canvas_draw_text(canvas, 0, 78, 30, &label_dsc, cpu_text);
     
-    char gpu_text[16] = {};
-    snprintf(gpu_text, sizeof(gpu_text), "GPU %2s%%", g_gpu);
-    lv_canvas_draw_text(canvas, 0, 88, 60, &label_dsc, gpu_text);
+    // RAM  
+    lv_canvas_draw_text(canvas, 32, 68, 30, &label_dsc, "RAM");
+    char ram_text[8] = {};
+    snprintf(ram_text, sizeof(ram_text), "%s", g_ram);
+    lv_canvas_draw_text(canvas, 32, 78, 30, &label_dsc, ram_text);
+    
+    // GPU
+    lv_canvas_draw_text(canvas, 0, 90, 30, &label_dsc, "GPU");
+    char gpu_text[8] = {};
+    snprintf(gpu_text, sizeof(gpu_text), "%s", g_gpu);
+    lv_canvas_draw_text(canvas, 0, 100, 30, &label_dsc, gpu_text);
 
-    char dsk_text[16] = {};
-    snprintf(dsk_text, sizeof(dsk_text), "DSK %2s%%", g_disk);
-    lv_canvas_draw_text(canvas, 0, 98, 60, &label_dsc, dsk_text);
+    // DSK
+    lv_canvas_draw_text(canvas, 32, 90, 30, &label_dsc, "DSK");
+    char dsk_text[8] = {};
+    snprintf(dsk_text, sizeof(dsk_text), "%s", g_disk);
+    lv_canvas_draw_text(canvas, 32, 100, 30, &label_dsc, dsk_text);
 }
 
 // Update all screen widgets when new HID data is received
